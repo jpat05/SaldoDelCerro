@@ -18,4 +18,9 @@ interface TransactionTypeDao {
 
     @Delete
     suspend fun deleteType(type: TransactionTypeEntity)
-}
+
+    @Query("SELECT * FROM transaction_types WHERE name = :name LIMIT 1")
+    suspend fun getTypeByName(name: String): TransactionTypeEntity?
+
+    @Query("SELECT COUNT(*) FROM transaction_types")
+    suspend fun count(): Int}

@@ -1,5 +1,6 @@
 package com.movil.saldodelcerro.services
 
+import com.movil.saldodelcerro.data.models.CategoryTotal
 import com.movil.saldodelcerro.data.models.TransactionDto
 import com.movil.saldodelcerro.data.models.TransactionEntity
 import com.movil.saldodelcerro.data.models.TransactionTypeEntity
@@ -9,6 +10,7 @@ import com.movil.saldodelcerro.data.repo.TransactionTypeDao
 import com.movil.saldodelcerro.data.repo.TransactionsDao
 import com.movil.saldodelcerro.data.repo.UserDao
 import kotlinx.coroutines.flow.Flow
+import java.math.BigDecimal
 
 class WalletService(
     private val userDao: UserDao,
@@ -28,4 +30,28 @@ class WalletService(
     suspend fun insertTransaction(transaction: TransactionEntity) = transactionDao.insertTransaction(transaction)
     suspend fun deleteTransaction(transaction: TransactionEntity) = transactionDao.deleteTransaction(transaction)
 
+    val availableBalance: Flow<BigDecimal> = transactionDao.getAvailableBalance()
+    val totalIncome: Flow<BigDecimal> = transactionDao.getTotalIncome()
+    val totalExpense: Flow<BigDecimal> = transactionDao.getTotalExpense()
+    val categoryTotals: Flow<List<CategoryTotal>> = transactionDao.getCategoryTotals()
+
+    suspend fun getCapitalBase(): TransactionDto? = transactionDao.getCapitalTransaction()
+
+    suspend fun saveCapitalBase(amount: BigDecimal) {
+        val capitalType = getOrCreateCapitalType()
+        transactionDao.deleteTransactionsByType(capitalType.id)
+        transactionDao.insertTransaction(
+            TransactionEntity(reason = CAPITAL_TYPE_NAME, amount = amount, typeId = capitalType.id)
+        )
+    }
+
+    private suspend fun getOrCreateCapitalType(): TransactionTypeEntity {
+        transactionTypeDao.getTypeByName(CAPITAL_TYPE_NAME)?.let { return it }
+        val id = transactionTypeDao.insertType(TransactionTypeEntity(name = CAPITAL_TYPE_NAME, isIncome = true))
+        return TransactionTypeEntity(id = id, name = CAPITAL_TYPE_NAME, isIncome = true)
+    }
+
+    companion object {
+        const val CAPITAL_TYPE_NAME = "Capital base"
+    }
 }
