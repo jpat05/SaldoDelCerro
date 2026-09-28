@@ -13,7 +13,7 @@ interface TransactionTypeDao {
     @Query("SELECT * FROM transaction_types ORDER BY name ASC")
     fun getAllTypeOrderByAsc(): Flow<List<TransactionTypeEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertType(type: TransactionTypeEntity): Long
 
     @Delete

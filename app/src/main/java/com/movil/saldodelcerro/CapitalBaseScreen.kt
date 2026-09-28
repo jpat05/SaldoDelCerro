@@ -49,7 +49,7 @@ fun CapitalBaseScreen(
             Column(Modifier.padding(16.dp)) {
                 Text("Capital actual", style = MaterialTheme.typography.labelLarge)
                 Text(
-                    capital?.transaction?.amount?.formatMoney() ?: "No definido",
+                    capital?.transaction?.amount?.formatMoney() ?: "Agrega un monto",
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
@@ -59,7 +59,7 @@ fun CapitalBaseScreen(
             value = input,
             onValueChange = { input = it.filter(Char::isDigit) },
             label = { Text("Monto inicial") },
-            prefix = { Text("S/ ") },
+            prefix = { Text("US$ ") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()

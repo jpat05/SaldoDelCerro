@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
         WalletService(
             userDao = database.userDao(),
             transactionTypeDao = database.transactionTypeDao(),
-            transactionDao = database.transactionDao()
+            transactionDao = database.transactionsDao()
         )
     }
 

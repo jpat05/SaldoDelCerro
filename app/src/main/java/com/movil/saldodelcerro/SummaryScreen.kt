@@ -58,7 +58,7 @@ fun SummaryScreen(
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp)) {
                     Text("Gastos por categoría", style = MaterialTheme.typography.titleMedium)
-                    categories.forEach { cat ->
+                    categories.filter { it.total > BigDecimal.ZERO }.forEach { cat ->
                         Text(cat.name, style = MaterialTheme.typography.titleSmall)
                         LinearProgressIndicator(
                             progress = {
