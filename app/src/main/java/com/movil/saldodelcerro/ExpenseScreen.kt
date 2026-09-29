@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.movil.saldodelcerro.data.models.TransactionEntity
+import com.movil.saldodelcerro.data.models.TransactionTypeEntity
 import com.movil.saldodelcerro.services.WalletService
 import kotlinx.coroutines.launch
 
@@ -41,6 +42,7 @@ fun ExpenseScreen(
     var amountInput by remember { mutableStateOf("") }
     var reasonInput by remember { mutableStateOf("") }
     var selectedTypeId by remember { mutableLongStateOf(0L) }
+    var mensaje by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(expenseTypes) {
@@ -59,7 +61,7 @@ fun ExpenseScreen(
             value = amountInput,
             onValueChange = { amountInput = it.filter(Char::isDigit) },
             label = { Text("Monto") },
-            prefix = { Text("$/ ") },
+            prefix = { Text("US$ ") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
@@ -92,9 +94,10 @@ fun ExpenseScreen(
                                 typeId = selectedTypeId
                             )
                         )
+                        mensaje = "Egreso guardado"
+                        amountInput = ""
+                        reasonInput = ""
                     }
-                    amountInput = ""
-                    reasonInput = ""
                 }
             },
             enabled = amountInput.isNotBlank() && selectedTypeId > 0L,
@@ -102,12 +105,20 @@ fun ExpenseScreen(
         ) {
             Text("Registrar egreso")
         }
+
+        if (mensaje.isNotEmpty()) {
+            Text(
+                mensaje,
+                color = androidx.compose.ui.graphics.Color(0xFF4CAF50),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 
 @Composable
 private fun CategoryDropdown(
-    categories: List<com.movil.saldodelcerro.data.models.TransactionTypeEntity>,
+    categories: List<TransactionTypeEntity>,
     selectedTypeId: Long,
     onSelect: (Long) -> Unit,
     modifier: Modifier = Modifier
@@ -120,20 +131,27 @@ private fun CategoryDropdown(
             onClick = { expanded = true },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(selected?.name ?: "Sin categorías")
+            Text(selected?.name ?: "Selecciona una categoría")
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            categories.forEach { type ->
+            if (categories.isEmpty()) {
                 DropdownMenuItem(
-                    text = { Text(type.name) },
-                    onClick = {
-                        onSelect(type.id)
-                        expanded = false
-                    }
+                    text = { Text("No hay categorías disponibles") },
+                    onClick = { expanded = false }
                 )
+            } else {
+                categories.forEach { type ->
+                    DropdownMenuItem(
+                        text = { Text(type.name) },
+                        onClick = {
+                            onSelect(type.id)
+                            expanded = false
+                        }
+                    )
+                }
             }
         }
     }
