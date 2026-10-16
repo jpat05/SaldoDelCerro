@@ -30,7 +30,7 @@ Pantalla (Composable) ─► WalletService ─► DAO (Room) ─► SQLite
 
 La barra inferior cambia entre 4 pestañas, cada una con su ícono:
 
-1. **Inicio** (`HomeScreen.kt`) — Tarjeta con el **saldo disponible**, filas de **Ingresos** y **Egresos** totales, y los **5 últimos movimientos**.
+1. **Inicio** (`HomeScreen.kt`) — Wordmark FinGO con el avatar, saludo al usuario, tarjeta con el **saldo disponible**, tarjetas de **Ingresos** y **Egresos**, y el botón **Ver movimientos** que lleva a la pestaña Resumen.
 2. **Capital** (`CapitalBaseScreen.kt`) — Muestra el **capital base actual** y un campo numérico (`$ `) para guardarlo o actualizarlo.
 3. **Egresos** (`ExpenseScreen.kt`) — Formulario para registrar un egreso: **monto**, **categoría** (desplegable) y **descripción**.
 4. **Resumen** (`SummaryScreen.kt`) — Estado financiero (Saldo/Ingresos/Egresos), **gastos por categoría** con barras de progreso y el **historial completo** de movimientos.

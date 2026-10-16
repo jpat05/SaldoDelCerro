@@ -51,7 +51,11 @@ fun FinGoApp(
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
         when (FinGoTab.entries[selectedTab]) {
-            FinGoTab.Home -> HomeScreen(walletService, contentModifier)
+            FinGoTab.Home -> HomeScreen(
+                walletService = walletService,
+                onSeeTransactions = { selectedTab = FinGoTab.Summary.ordinal },
+                modifier = contentModifier
+            )
             FinGoTab.Capital -> CapitalBaseScreen(walletService, contentModifier)
             FinGoTab.Expenses -> ExpenseScreen(walletService, contentModifier)
             FinGoTab.Summary -> SummaryScreen(walletService, contentModifier)
