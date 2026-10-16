@@ -31,7 +31,7 @@ Pantalla (Composable) ─► WalletService ─► DAO (Room) ─► SQLite
 La barra inferior cambia entre 4 pestañas, cada una con su ícono:
 
 1. **Inicio** (`HomeScreen.kt`) — Tarjeta con el **saldo disponible**, filas de **Ingresos** y **Egresos** totales, y los **5 últimos movimientos**.
-2. **Capital** (`CapitalBaseScreen.kt`) — Muestra el **capital base actual** y un campo numérico (`S/ `) para guardarlo o actualizarlo.
+2. **Capital** (`CapitalBaseScreen.kt`) — Muestra el **capital base actual** y un campo numérico (`$ `) para guardarlo o actualizarlo.
 3. **Egresos** (`ExpenseScreen.kt`) — Formulario para registrar un egreso: **monto**, **categoría** (desplegable) y **descripción**.
 4. **Resumen** (`SummaryScreen.kt`) — Estado financiero (Saldo/Ingresos/Egresos), **gastos por categoría** con barras de progreso y el **historial completo** de movimientos.
 
@@ -55,7 +55,7 @@ Al crear la base por primera vez, `AppDatabase` **siembra 6 categorías** por de
 
 ## Formato de dinero
 
-Todos los montos se muestran con `NumberFormat` para Perú: `S/ 1,234.56` (`utils/Formatters.kt`). Los movimientos se listan con `+` (verde) o `-` (rojo) según sean ingreso o egreso.
+Todos los montos se muestran con `DecimalFormat` en dólares: `$ 1,234.56` (`utils/Formatters.kt`, símbolo en la constante `CURRENCY_SYMBOL`). Los movimientos se listan con `+` (verde) o `-` (rojo) según sean ingreso o egreso.
 
 ## Cómo compilar y ejecutar
 

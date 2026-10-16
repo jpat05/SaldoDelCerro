@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.movil.saldodelcerro.data.models.TransactionEntity
 import com.movil.saldodelcerro.services.WalletService
+import com.movil.saldodelcerro.utils.CURRENCY_SYMBOL
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,7 +60,7 @@ fun ExpenseScreen(
             value = amountInput,
             onValueChange = { amountInput = it.filter(Char::isDigit) },
             label = { Text("Monto") },
-            prefix = { Text("$/ ") },
+            prefix = { Text("$CURRENCY_SYMBOL ") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
