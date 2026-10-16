@@ -12,21 +12,3 @@ import com.movil.saldodelcerro.views.FinGoApp
 class MainActivity : ComponentActivity() {
 
     private val database by lazy { AppDatabase.getDatabase(applicationContext) }
-    private val walletService by lazy {
-        WalletService(
-            userDao = database.userDao(),
-            transactionTypeDao = database.transactionTypeDao(),
-            transactionDao = database.transactionsDao()
-        )
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SaldoDelCerroTheme {
-                FinGoApp(walletService = walletService)
-            }
-        }
-    }
-}
