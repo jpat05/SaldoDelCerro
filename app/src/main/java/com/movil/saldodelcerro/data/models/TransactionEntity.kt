@@ -10,7 +10,7 @@ import java.math.BigDecimal
     tableName = "transactions",
     foreignKeys = [
         ForeignKey(
-            entity = TransactionTypeEntity::class,
+            entity = CategoryEntity::class,
             parentColumns = ["id"],
             childColumns = ["typeId"],
             onDelete = ForeignKey.RESTRICT

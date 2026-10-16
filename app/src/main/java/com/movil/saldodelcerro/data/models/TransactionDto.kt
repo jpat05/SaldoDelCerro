@@ -8,5 +8,5 @@ data class TransactionDto(
     @Relation(
         parentColumn = "typeId",
         entityColumn = "id"
-    ) val type: TransactionTypeEntity
+    ) val type: CategoryEntity
 )

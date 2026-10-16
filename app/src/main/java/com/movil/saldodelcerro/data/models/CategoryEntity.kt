@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "transaction_types")
-data class TransactionTypeEntity(
+data class CategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val name: String,
     val isIncome: Boolean
