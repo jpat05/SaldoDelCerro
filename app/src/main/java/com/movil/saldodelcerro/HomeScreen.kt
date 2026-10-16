@@ -16,10 +16,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,10 +50,11 @@ import com.movil.saldodelcerro.ui.theme.FinGoRed
 import com.movil.saldodelcerro.ui.theme.FinGoRedSoft
 import com.movil.saldodelcerro.ui.theme.FinGoSurface
 import com.movil.saldodelcerro.utils.formatMoney
+import com.movil.saldodelcerro.utils.startOfCurrentMonthMillis
 import java.math.BigDecimal
 
 // Nombre que se muestra en el saludo; cuando exista el login se lee del perfil.
-private const val USER_NAME = "Alvin"
+private const val USER_NAME = "Usuario"
 
 @Composable
 fun HomeScreen(
@@ -61,8 +63,13 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val balance by walletService.availableBalance.collectAsState(initial = BigDecimal.ZERO)
-    val totalIncome by walletService.totalIncome.collectAsState(initial = BigDecimal.ZERO)
-    val totalExpense by walletService.totalExpense.collectAsState(initial = BigDecimal.ZERO)
+    // Los totales del mes se recalculan al volver a la pestana: monthStart se recuerda
+    // mientras la pantalla sigue en composicion.
+    val monthStart = remember { startOfCurrentMonthMillis() }
+    val monthIncome by remember(monthStart) { walletService.incomeSince(monthStart) }
+        .collectAsState(initial = BigDecimal.ZERO)
+    val monthExpense by remember(monthStart) { walletService.expenseSince(monthStart) }
+        .collectAsState(initial = BigDecimal.ZERO)
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -75,17 +82,17 @@ fun HomeScreen(
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatCard(
-                    label = "Ingresos",
-                    value = totalIncome,
-                    icon = Icons.Filled.TrendingUp,
+                    label = "Ingresos del mes",
+                    value = monthIncome,
+                    icon = Icons.AutoMirrored.Filled.TrendingUp,
                     tint = FinGoGreen,
                     badgeColor = FinGoGreenSoft,
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
-                    label = "Egresos",
-                    value = totalExpense,
-                    icon = Icons.Filled.TrendingDown,
+                    label = "Gastos del mes",
+                    value = monthExpense,
+                    icon = Icons.AutoMirrored.Filled.TrendingDown,
                     tint = FinGoRed,
                     badgeColor = FinGoRedSoft,
                     modifier = Modifier.weight(1f)

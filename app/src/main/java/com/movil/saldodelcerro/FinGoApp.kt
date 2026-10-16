@@ -3,9 +3,9 @@ package com.movil.saldodelcerro.views
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -31,7 +31,7 @@ import com.movil.saldodelcerro.ui.theme.FinGoMuted
 private enum class FinGoTab(val label: String, val icon: ImageVector) {
     Home("Inicio", Icons.Filled.Home),
     Capital("Capital", Icons.Filled.Savings),
-    Expenses("Egresos", Icons.Filled.ReceiptLong),
+    Expenses("Egresos", Icons.AutoMirrored.Filled.ReceiptLong),
     // La cuarta pestana sigue siendo Resumen; cuando exista la pantalla de
     // Perfil se agrega como quinta.
     Summary("Resumen", Icons.Filled.PieChart)

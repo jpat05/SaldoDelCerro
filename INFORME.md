@@ -50,6 +50,7 @@ Al crear la base por primera vez, `AppDatabase` **siembra 6 categorías** por de
 - **Ingresos** = suma de movimientos con tipo `isIncome = 1`.
 - **Egresos** = suma con `isIncome = 0`.
 - **Gastos por categoría** = `SUM` agrupado por nombre de tipo, solo egresos.
+- **Totales del mes** (tarjetas del Inicio) = ingresos y egresos con `generatedDate >=` el primer día del mes en curso (`utils/MonthRange.kt`). En los ingresos se **excluye el tipo `Capital base`**: es el monto inicial de la billetera, no una ganancia del mes.
 - **Capital base**: se modela como una transacción "especial" del tipo `Capital base` (`isIncome = true`). Guardar un nuevo capital **borra el anterior** y escribe el nuevo, así el saldo siempre parte de ese monto.
 - `WalletService.availableBalance` etc. son `Flow`s de Room: al insertar o borrar un movimiento, las pantallas que los observan se **actualizan automáticamente** (sin recargar).
 

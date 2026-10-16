@@ -50,6 +50,21 @@ interface TransactionsDao {
     """)
     fun getTotalExpense(): Flow<BigDecimal>
 
+    /** Ingresos desde [sinceMillis], excluyendo el tipo [excludedTypeName]. */
+    @Query("""
+        SELECT COALESCE(SUM(t.amount), 0)
+        FROM transactions t INNER JOIN transaction_types tt ON t.typeId = tt.id
+        WHERE tt.isIncome = 1 AND t.generatedDate >= :sinceMillis AND tt.name <> :excludedTypeName
+    """)
+    fun getIncomeSince(sinceMillis: Long, excludedTypeName: String): Flow<BigDecimal>
+
+    @Query("""
+        SELECT COALESCE(SUM(t.amount), 0)
+        FROM transactions t INNER JOIN transaction_types tt ON t.typeId = tt.id
+        WHERE tt.isIncome = 0 AND t.generatedDate >= :sinceMillis
+    """)
+    fun getExpenseSince(sinceMillis: Long): Flow<BigDecimal>
+
     @Query("""
         SELECT tt.name AS name, COALESCE(SUM(t.amount), 0) AS total
         FROM transaction_types tt LEFT JOIN transactions t ON t.typeId = tt.id

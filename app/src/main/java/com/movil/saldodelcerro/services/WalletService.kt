@@ -35,6 +35,17 @@ class WalletService(
     val totalExpense: Flow<BigDecimal> = transactionDao.getTotalExpense()
     val categoryTotals: Flow<List<CategoryTotal>> = transactionDao.getCategoryTotals()
 
+    /**
+     * Ingresos acumulados desde [sinceMillis]. El capital base se excluye porque es
+     * el monto inicial de la billetera, no un ingreso del periodo.
+     */
+    fun incomeSince(sinceMillis: Long): Flow<BigDecimal> =
+        transactionDao.getIncomeSince(sinceMillis, CAPITAL_TYPE_NAME)
+
+    /** Egresos acumulados desde [sinceMillis]. */
+    fun expenseSince(sinceMillis: Long): Flow<BigDecimal> =
+        transactionDao.getExpenseSince(sinceMillis)
+
     suspend fun getCapitalBase(): TransactionDto? = transactionDao.getCapitalTransaction()
 
     suspend fun saveCapitalBase(amount: BigDecimal) {
