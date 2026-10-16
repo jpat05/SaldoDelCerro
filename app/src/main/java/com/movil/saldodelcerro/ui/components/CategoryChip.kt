@@ -19,13 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.movil.saldodelcerro.data.models.TransactionTypeEntity
+import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 import com.movil.saldodelcerro.utils.getCategoryStyle
 
 @Composable
 fun CategoryChip(
-    type: TransactionTypeEntity,
+    type: CategoryEntity,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -66,12 +66,12 @@ private fun CategoryChipPreview() {
     SaldoDelCerroTheme(dynamicColor = false) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             CategoryChip(
-                type = TransactionTypeEntity(id = 1L, name = "Comida", isIncome = false),
+                type = CategoryEntity(id = 1L, name = "Comida", isIncome = false),
                 isSelected = false,
                 onClick = {}
             )
             CategoryChip(
-                type = TransactionTypeEntity(id = 2L, name = "Transporte", isIncome = false),
+                type = CategoryEntity(id = 2L, name = "Transporte", isIncome = false),
                 isSelected = true,
                 onClick = {}
             )

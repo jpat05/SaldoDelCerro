@@ -23,12 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.movil.saldodelcerro.data.models.TransactionTypeEntity
+import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 
 @Composable
 fun CategorySelector(
-    types: List<TransactionTypeEntity>,
+    types: List<CategoryEntity>,
     selectedTypeId: Long,
     onTypeSelected: (Long) -> Unit,
     onAddCategoryClick: () -> Unit,
@@ -95,11 +95,11 @@ private fun CategorySelectorPreview() {
     SaldoDelCerroTheme(dynamicColor = false) {
         CategorySelector(
             types = listOf(
-                TransactionTypeEntity(id = 1L, name = "Comida", isIncome = false),
-                TransactionTypeEntity(id = 2L, name = "Transporte", isIncome = false),
-                TransactionTypeEntity(id = 3L, name = "Ocio", isIncome = false),
-                TransactionTypeEntity(id = 4L, name = "Salud", isIncome = false),
-                TransactionTypeEntity(id = 5L, name = "Otros", isIncome = false)
+                CategoryEntity(id = 1L, name = "Comida", isIncome = false),
+                CategoryEntity(id = 2L, name = "Transporte", isIncome = false),
+                CategoryEntity(id = 3L, name = "Ocio", isIncome = false),
+                CategoryEntity(id = 4L, name = "Salud", isIncome = false),
+                CategoryEntity(id = 5L, name = "Otros", isIncome = false)
             ),
             selectedTypeId = 2L,
             onTypeSelected = {},

@@ -34,9 +34,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.data.models.TransactionEntity
-import com.movil.saldodelcerro.data.models.TransactionTypeEntity
-import com.movil.saldodelcerro.services.WalletService
+import com.movil.saldodelcerro.services.CategoryService
+import com.movil.saldodelcerro.services.TransactionService
 import com.movil.saldodelcerro.ui.components.AddCategoryDialog
 import com.movil.saldodelcerro.ui.components.CategorySelector
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
@@ -44,11 +45,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ExpenseScreen(
-    walletService: WalletService,
+    transactionService: TransactionService,
+    categoryService: CategoryService,
     modifier: Modifier = Modifier
 ) {
-    val allTypes by walletService.allTypes.collectAsState(initial = emptyList())
-    val expenseTypes = remember(allTypes) { allTypes.filter { !it.isIncome } }
+    val expenseCategories by categoryService.expenseCategories.collectAsState(initial = emptyList())
 
     var amountInput by remember { mutableStateOf("") }
     var reasonInput by remember { mutableStateOf("") }
@@ -61,14 +62,14 @@ fun ExpenseScreen(
 
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(expenseTypes) {
-        if (selectedTypeId == 0L && expenseTypes.isNotEmpty()) {
-            selectedTypeId = expenseTypes.first().id
+    LaunchedEffect(expenseCategories) {
+        if (selectedTypeId == 0L && expenseCategories.isNotEmpty()) {
+            selectedTypeId = expenseCategories.first().id
         }
     }
 
     ExpenseContent(
-        expenseTypes = expenseTypes,
+        expenseCategories = expenseCategories,
         amountInput = amountInput,
         reasonInput = reasonInput,
         selectedTypeId = selectedTypeId,
@@ -81,7 +82,7 @@ fun ExpenseScreen(
             val amount = amountInput.toBigDecimalOrNull()
             if (amount != null && selectedTypeId > 0L) {
                 scope.launch {
-                    walletService.insertTransaction(
+                    transactionService.add(
                         TransactionEntity(
                             reason = reasonInput.ifBlank { "Egreso" },
                             amount = amount,
@@ -97,7 +98,7 @@ fun ExpenseScreen(
         modifier = modifier
     )
 
-    // Diálogo para ingresar nueva categoría usando `walletService.insertType`
+    // Diálogo para ingresar nueva categoría usando `categoryService.add`
     if (showAddCategoryDialog) {
         AddCategoryDialog(
             name = newCategoryName,
@@ -105,8 +106,8 @@ fun ExpenseScreen(
             onConfirm = {
                 if (newCategoryName.isNotBlank()) {
                     scope.launch {
-                        walletService.insertType(
-                            TransactionTypeEntity(
+                        categoryService.add(
+                            CategoryEntity(
                                 name = newCategoryName.trim(),
                                 isIncome = false
                             )
@@ -123,7 +124,7 @@ fun ExpenseScreen(
 
 @Composable
 private fun ExpenseContent(
-    expenseTypes: List<TransactionTypeEntity>,
+    expenseCategories: List<CategoryEntity>,
     amountInput: String,
     reasonInput: String,
     selectedTypeId: Long,
@@ -190,7 +191,7 @@ private fun ExpenseContent(
 
         // 3. Sección de Categorías ordenadas en filas simétricas
         CategorySelector(
-            types = expenseTypes,
+            types = expenseCategories,
             selectedTypeId = selectedTypeId,
             onTypeSelected = onTypeSelected,
             onAddCategoryClick = onAddCategoryClick
@@ -232,10 +233,10 @@ private fun ExpenseContent(
 private fun ExpenseContentPreview() {
     SaldoDelCerroTheme(dynamicColor = false) {
         ExpenseContent(
-            expenseTypes = listOf(
-                TransactionTypeEntity(id = 1L, name = "Comida", isIncome = false),
-                TransactionTypeEntity(id = 2L, name = "Transporte", isIncome = false),
-                TransactionTypeEntity(id = 3L, name = "Ocio", isIncome = false)
+            expenseCategories = listOf(
+                CategoryEntity(id = 1L, name = "Comida", isIncome = false),
+                CategoryEntity(id = 2L, name = "Transporte", isIncome = false),
+                CategoryEntity(id = 3L, name = "Ocio", isIncome = false)
             ),
             amountInput = "20",
             reasonInput = "Compra en supermercado",

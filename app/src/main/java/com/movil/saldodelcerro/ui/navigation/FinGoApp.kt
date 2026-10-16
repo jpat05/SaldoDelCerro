@@ -14,14 +14,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.movil.saldodelcerro.services.WalletService
-import com.movil.saldodelcerro.ui.screens.capital.CapitalBaseScreen
+import com.movil.saldodelcerro.services.CategoryService
+import com.movil.saldodelcerro.services.LedgerService
+import com.movil.saldodelcerro.services.TransactionService
 import com.movil.saldodelcerro.ui.screens.expense.ExpenseScreen
 import com.movil.saldodelcerro.ui.screens.home.HomeScreen
+import com.movil.saldodelcerro.ui.screens.income.IncomeScreen
 import com.movil.saldodelcerro.ui.screens.summary.SummaryScreen
 
 @Composable
-fun FinGoApp(walletService: WalletService) {
+fun FinGoApp(
+    transactionService: TransactionService,
+    categoryService: CategoryService,
+    ledgerService: LedgerService
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -53,10 +59,10 @@ fun FinGoApp(walletService: WalletService) {
             startDestination = "home",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("home") { HomeScreen(walletService) }
-            composable("capital") { CapitalBaseScreen(walletService) }
-            composable("expenses") { ExpenseScreen(walletService) }
-            composable("summary") { SummaryScreen(walletService) }
+            composable("home") { HomeScreen(ledgerService, transactionService) }
+            composable("income") { IncomeScreen(transactionService, categoryService) }
+            composable("expenses") { ExpenseScreen(transactionService, categoryService) }
+            composable("summary") { SummaryScreen(ledgerService, transactionService) }
         }
     }
 }

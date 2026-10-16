@@ -18,11 +18,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.data.models.CategoryTotal
 import com.movil.saldodelcerro.data.models.TransactionDto
 import com.movil.saldodelcerro.data.models.TransactionEntity
-import com.movil.saldodelcerro.data.models.TransactionTypeEntity
-import com.movil.saldodelcerro.services.WalletService
+import com.movil.saldodelcerro.services.LedgerService
+import com.movil.saldodelcerro.services.TransactionService
 import com.movil.saldodelcerro.ui.components.SummaryRow
 import com.movil.saldodelcerro.ui.components.TransactionRow
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
@@ -31,14 +32,15 @@ import java.math.BigDecimal
 
 @Composable
 fun SummaryScreen(
-    walletService: WalletService,
+    ledgerService: LedgerService,
+    transactionService: TransactionService,
     modifier: Modifier = Modifier
 ) {
-    val balance by walletService.availableBalance.collectAsState(initial = BigDecimal.ZERO)
-    val totalIncome by walletService.totalIncome.collectAsState(initial = BigDecimal.ZERO)
-    val totalExpense by walletService.totalExpense.collectAsState(initial = BigDecimal.ZERO)
-    val categories by walletService.categoryTotals.collectAsState(initial = emptyList())
-    val transactions by walletService.allTransactionsDto.collectAsState(initial = emptyList())
+    val balance by ledgerService.availableBalance.collectAsState(initial = BigDecimal.ZERO)
+    val totalIncome by ledgerService.totalIncome.collectAsState(initial = BigDecimal.ZERO)
+    val totalExpense by ledgerService.totalExpense.collectAsState(initial = BigDecimal.ZERO)
+    val categories by ledgerService.categoryTotals.collectAsState(initial = emptyList())
+    val transactions by transactionService.transactions.collectAsState(initial = emptyList())
 
     SummaryContent(
         balance = balance,
@@ -118,7 +120,7 @@ private fun SummaryContentPreview() {
             transactions = listOf(
                 TransactionDto(
                     transaction = TransactionEntity(reason = "Compra supermercado", amount = BigDecimal("120.50"), typeId = 2L),
-                    type = TransactionTypeEntity(id = 2L, name = "Comida", isIncome = false)
+                    type = CategoryEntity(id = 2L, name = "Comida", isIncome = false)
                 )
             )
         )

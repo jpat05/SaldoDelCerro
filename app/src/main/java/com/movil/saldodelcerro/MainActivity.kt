@@ -5,27 +5,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.movil.saldodelcerro.data.repo.AppDatabase
-import com.movil.saldodelcerro.services.WalletService
-import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
+import com.movil.saldodelcerro.services.CategoryService
+import com.movil.saldodelcerro.services.LedgerService
+import com.movil.saldodelcerro.services.TransactionService
 import com.movil.saldodelcerro.ui.navigation.FinGoApp
+import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 
 class MainActivity : ComponentActivity() {
 
     private val database by lazy { AppDatabase.getDatabase(applicationContext) }
-    private val walletService by lazy {
-        WalletService(
-            userDao = database.userDao(),
-            transactionTypeDao = database.transactionTypeDao(),
-            transactionDao = database.transactionsDao()
-        )
-    }
+
+    private val transactionService by lazy { TransactionService(database.transactionsDao()) }
+    private val categoryService by lazy { CategoryService(database.categoryDao()) }
+    private val ledgerService by lazy { LedgerService(transactionService) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SaldoDelCerroTheme {
-                FinGoApp(walletService = walletService)
+                FinGoApp(
+                    transactionService = transactionService,
+                    categoryService = categoryService,
+                    ledgerService = ledgerService
+                )
             }
         }
     }

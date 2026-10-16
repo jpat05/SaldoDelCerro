@@ -14,9 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.data.models.TransactionDto
 import com.movil.saldodelcerro.data.models.TransactionEntity
-import com.movil.saldodelcerro.data.models.TransactionTypeEntity
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 import com.movil.saldodelcerro.utils.formatMoney
 import java.math.BigDecimal
@@ -53,7 +53,7 @@ private fun TransactionRowExpensePreview() {
                     amount = BigDecimal("45.50"),
                     typeId = 1L
                 ),
-                type = TransactionTypeEntity(id = 1L, name = "Comida", isIncome = false)
+                type = CategoryEntity(id = 1L, name = "Comida", isIncome = false)
             )
         )
     }
@@ -66,11 +66,11 @@ private fun TransactionRowIncomePreview() {
         TransactionRow(
             dto = TransactionDto(
                 transaction = TransactionEntity(
-                    reason = "Capital base",
-                    amount = BigDecimal("1000.00"),
+                    reason = "Pago de salario",
+                    amount = BigDecimal("1500.00"),
                     typeId = 2L
                 ),
-                type = TransactionTypeEntity(id = 2L, name = "Capital base", isIncome = true)
+                type = CategoryEntity(id = 2L, name = "Salario", isIncome = true)
             )
         )
     }
