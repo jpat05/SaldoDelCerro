@@ -1,11 +1,6 @@
-package com.movil.saldodelcerro.views
+package com.movil.saldodelcerro.ui.navigation
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -14,21 +9,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.movil.saldodelcerro.services.WalletService
-
-
-private enum class FinGoTab(val label: String, val icon: ImageVector) {
-    Home("Inicio", Icons.Filled.Home),
-    Capital("Capital", Icons.Filled.Star),
-    Expenses("Egresos", Icons.Filled.AddCircle),
-    Summary("Resumen", Icons.Filled.List)
-}
+import com.movil.saldodelcerro.ui.screens.capital.CapitalBaseScreen
+import com.movil.saldodelcerro.ui.screens.expense.ExpenseScreen
+import com.movil.saldodelcerro.ui.screens.home.HomeScreen
+import com.movil.saldodelcerro.ui.screens.summary.SummaryScreen
 
 @Composable
 fun FinGoApp(walletService: WalletService) {

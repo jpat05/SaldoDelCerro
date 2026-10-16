@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import com.movil.saldodelcerro.data.repo.AppDatabase
 import com.movil.saldodelcerro.services.WalletService
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
-import com.movil.saldodelcerro.views.FinGoApp
+import com.movil.saldodelcerro.ui.navigation.FinGoApp
 
 class MainActivity : ComponentActivity() {
 

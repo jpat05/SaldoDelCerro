@@ -1,9 +1,8 @@
-package com.movil.saldodelcerro.views
+package com.movil.saldodelcerro.ui.screens.summary
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,9 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.movil.saldodelcerro.data.models.CategoryTotal
+import com.movil.saldodelcerro.data.models.TransactionDto
+import com.movil.saldodelcerro.data.models.TransactionEntity
+import com.movil.saldodelcerro.data.models.TransactionTypeEntity
 import com.movil.saldodelcerro.services.WalletService
+import com.movil.saldodelcerro.ui.components.SummaryRow
+import com.movil.saldodelcerro.ui.components.TransactionRow
+import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 import com.movil.saldodelcerro.utils.formatMoney
 import java.math.BigDecimal
 
@@ -34,6 +40,25 @@ fun SummaryScreen(
     val categories by walletService.categoryTotals.collectAsState(initial = emptyList())
     val transactions by walletService.allTransactionsDto.collectAsState(initial = emptyList())
 
+    SummaryContent(
+        balance = balance,
+        totalIncome = totalIncome,
+        totalExpense = totalExpense,
+        categories = categories,
+        transactions = transactions,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun SummaryContent(
+    balance: BigDecimal,
+    totalIncome: BigDecimal,
+    totalExpense: BigDecimal,
+    categories: List<CategoryTotal>,
+    transactions: List<TransactionDto>,
+    modifier: Modifier = Modifier
+) {
     val maxCategory = categories.maxOfOrNull { it.total } ?: BigDecimal.ONE
 
     LazyColumn(
@@ -77,13 +102,25 @@ fun SummaryScreen(
     }
 }
 
+@Preview(showBackground = true, name = "SummaryScreen")
 @Composable
-private fun SummaryRow(label: String, value: BigDecimal) {
-    Row(
-        Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label)
-        Text(value.formatMoney(), fontWeight = FontWeight.Bold)
+private fun SummaryContentPreview() {
+    SaldoDelCerroTheme(dynamicColor = false) {
+        SummaryContent(
+            balance = BigDecimal("1179.25"),
+            totalIncome = BigDecimal("1500.00"),
+            totalExpense = BigDecimal("320.75"),
+            categories = listOf(
+                CategoryTotal("Comida", BigDecimal("120.50")),
+                CategoryTotal("Transporte", BigDecimal("40.25")),
+                CategoryTotal("Salud", BigDecimal("160.00"))
+            ),
+            transactions = listOf(
+                TransactionDto(
+                    transaction = TransactionEntity(reason = "Compra supermercado", amount = BigDecimal("120.50"), typeId = 2L),
+                    type = TransactionTypeEntity(id = 2L, name = "Comida", isIncome = false)
+                )
+            )
+        )
     }
 }
