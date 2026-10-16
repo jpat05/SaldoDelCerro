@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.movil.saldodelcerro.data.models.TransactionEntity
 import com.movil.saldodelcerro.services.WalletService
 import com.movil.saldodelcerro.utils.CURRENCY_SYMBOL
+import com.movil.saldodelcerro.utils.filterAmountInput
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,10 +59,10 @@ fun ExpenseScreen(
 
         OutlinedTextField(
             value = amountInput,
-            onValueChange = { amountInput = it.filter(Char::isDigit) },
+            onValueChange = { amountInput = it.filterAmountInput() },
             label = { Text("Monto") },
             prefix = { Text("$CURRENCY_SYMBOL ") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )

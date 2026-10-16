@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.movil.saldodelcerro.data.models.TransactionDto
 import com.movil.saldodelcerro.services.WalletService
 import com.movil.saldodelcerro.utils.CURRENCY_SYMBOL
+import com.movil.saldodelcerro.utils.filterAmountInput
 import com.movil.saldodelcerro.utils.formatMoney
 import kotlinx.coroutines.launch
 
@@ -58,10 +59,10 @@ fun CapitalBaseScreen(
 
         OutlinedTextField(
             value = input,
-            onValueChange = { input = it.filter(Char::isDigit) },
+            onValueChange = { input = it.filterAmountInput() },
             label = { Text("Monto inicial") },
             prefix = { Text("$CURRENCY_SYMBOL ") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
