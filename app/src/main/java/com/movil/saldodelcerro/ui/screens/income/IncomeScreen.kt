@@ -11,7 +11,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,13 +45,11 @@ fun IncomeScreen(
     IncomeContent(
         incomeCategories = state.categories,
         amountInput = state.amountInput,
-        reasonInput = state.reasonInput,
         selectedTypeId = state.selectedCategoryId,
         message = state.feedback?.message,
         isError = state.feedback?.isError ?: false,
         isSubmitting = state.isSubmitting,
         onAmountChange = viewModel::onAmountChange,
-        onReasonChange = viewModel::onReasonChange,
         onTypeSelected = viewModel::onCategorySelected,
         onAddCategoryClick = { showAddCategoryDialog = true },
         onSubmit = viewModel::submit,
@@ -79,13 +76,11 @@ fun IncomeScreen(
 private fun IncomeContent(
     incomeCategories: List<CategoryEntity>,
     amountInput: String,
-    reasonInput: String,
     selectedTypeId: Long,
     message: String?,
     isError: Boolean,
     isSubmitting: Boolean,
     onAmountChange: (String) -> Unit,
-    onReasonChange: (String) -> Unit,
     onTypeSelected: (Long) -> Unit,
     onAddCategoryClick: () -> Unit,
     onSubmit: () -> Unit,
@@ -125,25 +120,7 @@ private fun IncomeContent(
             shape = MaterialTheme.shapes.small
         )
 
-        // 2. Campo Descripción con ícono
-        OutlinedTextField(
-            value = reasonInput,
-            onValueChange = onReasonChange,
-            label = { Text("Descripción (opcional)") },
-            placeholder = { Text("Ej. Pago de salario") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Description,
-                    contentDescription = "Descripción",
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.small
-        )
-
-        // 3. Sección de Categorías de ingreso
+        // 2. Sección de Categorías de ingreso
         CategorySelector(
             types = incomeCategories,
             selectedTypeId = selectedTypeId,
@@ -151,7 +128,7 @@ private fun IncomeContent(
             onAddCategoryClick = onAddCategoryClick
         )
 
-        // 4. Botón Registrar Ingreso (color de marca: primary)
+        // 3. Botón Registrar Ingreso (color de marca: primary)
         Button(
             onClick = onSubmit,
             enabled = amountInput.isNotBlank() && selectedTypeId > 0L && !isSubmitting,
@@ -187,13 +164,11 @@ private fun IncomeContentPreview() {
                 CategoryEntity(id = 3L, name = "Otros ingresos", isIncome = true)
             ),
             amountInput = "1500",
-            reasonInput = "Pago de salario",
             selectedTypeId = 1L,
             message = "¡Ingreso registrado con éxito!",
             isError = false,
             isSubmitting = false,
             onAmountChange = {},
-            onReasonChange = {},
             onTypeSelected = {},
             onAddCategoryClick = {},
             onSubmit = {}
