@@ -13,6 +13,9 @@ interface CategoryDao {
     @Query("SELECT * FROM transaction_types ORDER BY name ASC")
     fun getAllOrderByAsc(): Flow<List<CategoryEntity>>
 
+    @Query("SELECT COUNT(*) FROM transaction_types")
+    suspend fun count(): Int
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(category: CategoryEntity): Long
 
