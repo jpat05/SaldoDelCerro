@@ -23,7 +23,6 @@ import com.movil.saldodelcerro.data.models.CategoryTotal
 import com.movil.saldodelcerro.data.models.TransactionDto
 import com.movil.saldodelcerro.data.models.TransactionEntity
 import com.movil.saldodelcerro.services.LedgerService
-import com.movil.saldodelcerro.services.TransactionService
 import com.movil.saldodelcerro.ui.components.SummaryRow
 import com.movil.saldodelcerro.ui.components.TransactionRow
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
@@ -33,21 +32,20 @@ import java.math.BigDecimal
 @Composable
 fun SummaryScreen(
     ledgerService: LedgerService,
-    transactionService: TransactionService,
     modifier: Modifier = Modifier
 ) {
     val balance by ledgerService.availableBalance.collectAsState(initial = BigDecimal.ZERO)
     val totalIncome by ledgerService.totalIncome.collectAsState(initial = BigDecimal.ZERO)
     val totalExpense by ledgerService.totalExpense.collectAsState(initial = BigDecimal.ZERO)
     val categories by ledgerService.categoryTotals.collectAsState(initial = emptyList())
-    val transactions by transactionService.transactions.collectAsState(initial = emptyList())
+    val movements by ledgerService.movements.collectAsState(initial = emptyList())
 
     SummaryContent(
         balance = balance,
         totalIncome = totalIncome,
         totalExpense = totalExpense,
         categories = categories,
-        transactions = transactions,
+        movements = movements,
         modifier = modifier
     )
 }
@@ -58,7 +56,7 @@ private fun SummaryContent(
     totalIncome: BigDecimal,
     totalExpense: BigDecimal,
     categories: List<CategoryTotal>,
-    transactions: List<TransactionDto>,
+    movements: List<TransactionDto>,
     modifier: Modifier = Modifier
 ) {
     val maxCategory = categories.maxOfOrNull { it.total } ?: BigDecimal.ONE
@@ -100,7 +98,7 @@ private fun SummaryContent(
         }
 
         item { Text("Movimientos", style = MaterialTheme.typography.titleMedium) }
-        items(transactions) { TransactionRow(it) }
+        items(movements) { TransactionRow(it) }
     }
 }
 
@@ -117,7 +115,7 @@ private fun SummaryContentPreview() {
                 CategoryTotal("Transporte", BigDecimal("40.25")),
                 CategoryTotal("Salud", BigDecimal("160.00"))
             ),
-            transactions = listOf(
+            movements = listOf(
                 TransactionDto(
                     transaction = TransactionEntity(reason = "Compra supermercado", amount = BigDecimal("120.50"), typeId = 2L),
                     type = CategoryEntity(id = 2L, name = "Comida", isIncome = false)

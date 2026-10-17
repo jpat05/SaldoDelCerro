@@ -1,4 +1,4 @@
-package com.movil.saldodelcerro.utils
+package com.movil.saldodelcerro.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*

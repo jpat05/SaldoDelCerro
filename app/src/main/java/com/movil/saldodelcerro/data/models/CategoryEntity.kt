@@ -7,5 +7,7 @@ import androidx.room.PrimaryKey
 data class CategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val name: String,
-    val isIncome: Boolean
+    val isIncome: Boolean,
+    /** Soft delete: archived categories stay on their movements but vanish from the pickers. */
+    val active: Boolean = true
 )

@@ -9,7 +9,8 @@ import com.movil.saldodelcerro.data.repo.CategoryDao
  * Deliberately kept out of [com.movil.saldodelcerro.data.repo.AppDatabase]: seeding is not schema
  * creation. The caller (startup / DI) owns invoking this.
  *
- * [seed] is idempotent: it does nothing if any category already exists.
+ * [seed] is idempotent: it does nothing if any category already exists, and the insert is a single
+ * statement so the batch is applied atomically.
  */
 object CategorySeeder {
 
@@ -28,6 +29,6 @@ object CategorySeeder {
 
     suspend fun seed(categoryDao: CategoryDao) {
         if (categoryDao.count() > 0) return
-        defaultCategories.forEach { categoryDao.insert(it) }
+        categoryDao.insertAll(defaultCategories)
     }
 }

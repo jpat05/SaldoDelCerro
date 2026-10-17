@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
 
     private val transactionService by lazy { TransactionService(database.transactionsDao()) }
     private val categoryService by lazy { CategoryService(database.categoryDao()) }
-    private val ledgerService by lazy { LedgerService(transactionService) }
+    private val ledgerService by lazy { LedgerService(transactionService, categoryService) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,9 +33,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             SaldoDelCerroTheme {
                 FinGoApp(
-                    transactionService = transactionService,
-                    categoryService = categoryService,
-                    ledgerService = ledgerService
+                    ledgerService = ledgerService,
+                    categoryService = categoryService
                 )
             }
         }

@@ -35,17 +35,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.movil.saldodelcerro.data.models.CategoryEntity
+import com.movil.saldodelcerro.data.models.LedgerResult
 import com.movil.saldodelcerro.data.models.TransactionEntity
 import com.movil.saldodelcerro.services.CategoryService
-import com.movil.saldodelcerro.services.TransactionService
+import com.movil.saldodelcerro.services.LedgerService
 import com.movil.saldodelcerro.ui.components.AddCategoryDialog
 import com.movil.saldodelcerro.ui.components.CategorySelector
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
+import com.movil.saldodelcerro.utils.sanitizeMoneyInput
+import com.movil.saldodelcerro.utils.toMoneyOrNull
 import kotlinx.coroutines.launch
 
 @Composable
 fun IncomeScreen(
-    transactionService: TransactionService,
+    ledgerService: LedgerService,
     categoryService: CategoryService,
     modifier: Modifier = Modifier
 ) {
@@ -54,7 +57,9 @@ fun IncomeScreen(
     var amountInput by remember { mutableStateOf("") }
     var reasonInput by remember { mutableStateOf("") }
     var selectedTypeId by remember { mutableLongStateOf(0L) }
-    var mensaje by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf<String?>(null) }
+    var isError by remember { mutableStateOf(false) }
+    var isSubmitting by remember { mutableStateOf(false) }
 
     // Control para el diálogo emergente de nueva categoría
     var showAddCategoryDialog by remember { mutableStateOf(false) }
@@ -73,25 +78,45 @@ fun IncomeScreen(
         amountInput = amountInput,
         reasonInput = reasonInput,
         selectedTypeId = selectedTypeId,
-        message = mensaje,
-        onAmountChange = { amountInput = it.filter(Char::isDigit) },
+        message = message,
+        isError = isError,
+        isSubmitting = isSubmitting,
+        onAmountChange = { amountInput = it.sanitizeMoneyInput() },
         onReasonChange = { reasonInput = it },
         onTypeSelected = { selectedTypeId = it },
         onAddCategoryClick = { showAddCategoryDialog = true },
         onSubmit = {
-            val amount = amountInput.toBigDecimalOrNull()
-            if (amount != null && selectedTypeId > 0L) {
+            val amount = amountInput.toMoneyOrNull()
+            val category = incomeCategories.find { it.id == selectedTypeId }
+            if (amount != null && category != null && !isSubmitting) {
                 scope.launch {
-                    transactionService.add(
+                    isSubmitting = true
+                    val result = ledgerService.registerMovement(
                         TransactionEntity(
                             reason = reasonInput.ifBlank { "Ingreso" },
                             amount = amount,
-                            typeId = selectedTypeId
-                        )
+                            typeId = category.id
+                        ),
+                        category
                     )
-                    mensaje = "¡Ingreso registrado con éxito!"
-                    amountInput = ""
-                    reasonInput = ""
+                    when (result) {
+                        LedgerResult.Accepted -> {
+                            message = "¡Ingreso registrado con éxito!"
+                            isError = false
+                            amountInput = ""
+                            reasonInput = ""
+                        }
+                        is LedgerResult.Rejected -> {
+                            message = when (result.reason) {
+                                LedgerResult.Reason.INSUFFICIENT_FUNDS ->
+                                    "No se pudo registrar el ingreso."
+                                LedgerResult.Reason.NON_POSITIVE_AMOUNT ->
+                                    "El monto debe ser mayor que cero."
+                            }
+                            isError = true
+                        }
+                    }
+                    isSubmitting = false
                 }
             }
         },
@@ -128,7 +153,9 @@ private fun IncomeContent(
     amountInput: String,
     reasonInput: String,
     selectedTypeId: Long,
-    message: String,
+    message: String?,
+    isError: Boolean,
+    isSubmitting: Boolean,
     onAmountChange: (String) -> Unit,
     onReasonChange: (String) -> Unit,
     onTypeSelected: (Long) -> Unit,
@@ -165,7 +192,7 @@ private fun IncomeContent(
                 )
             },
             suffix = { Text("$") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
@@ -200,7 +227,7 @@ private fun IncomeContent(
         // 4. Botón Registrar Ingreso
         Button(
             onClick = onSubmit,
-            enabled = amountInput.isNotBlank() && selectedTypeId > 0L,
+            enabled = amountInput.isNotBlank() && selectedTypeId > 0L && !isSubmitting,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -217,10 +244,10 @@ private fun IncomeContent(
             )
         }
 
-        if (message.isNotEmpty()) {
+        if (message != null) {
             Text(
                 message,
-                color = Color(0xFF4CAF50),
+                color = if (isError) Color(0xFFC62828) else Color(0xFF4CAF50),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium
             )
@@ -242,6 +269,8 @@ private fun IncomeContentPreview() {
             reasonInput = "Pago de salario",
             selectedTypeId = 1L,
             message = "¡Ingreso registrado con éxito!",
+            isError = false,
+            isSubmitting = false,
             onAmountChange = {},
             onReasonChange = {},
             onTypeSelected = {},

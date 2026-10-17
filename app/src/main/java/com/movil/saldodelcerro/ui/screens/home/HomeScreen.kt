@@ -19,7 +19,6 @@ import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.data.models.TransactionDto
 import com.movil.saldodelcerro.data.models.TransactionEntity
 import com.movil.saldodelcerro.services.LedgerService
-import com.movil.saldodelcerro.services.TransactionService
 import com.movil.saldodelcerro.ui.components.BalanceCard
 import com.movil.saldodelcerro.ui.components.SummaryCard
 import com.movil.saldodelcerro.ui.components.TransactionRow
@@ -29,19 +28,18 @@ import java.math.BigDecimal
 @Composable
 fun HomeScreen(
     ledgerService: LedgerService,
-    transactionService: TransactionService,
     modifier: Modifier = Modifier
 ) {
     val balance by ledgerService.availableBalance.collectAsState(initial = BigDecimal.ZERO)
     val totalIncome by ledgerService.totalIncome.collectAsState(initial = BigDecimal.ZERO)
     val totalExpense by ledgerService.totalExpense.collectAsState(initial = BigDecimal.ZERO)
-    val transactions by transactionService.transactions.collectAsState(initial = emptyList())
+    val movements by ledgerService.movements.collectAsState(initial = emptyList())
 
     HomeContent(
         balance = balance,
         totalIncome = totalIncome,
         totalExpense = totalExpense,
-        transactions = transactions,
+        movements = movements,
         modifier = modifier
     )
 }
@@ -51,7 +49,7 @@ private fun HomeContent(
     balance: BigDecimal,
     totalIncome: BigDecimal,
     totalExpense: BigDecimal,
-    transactions: List<TransactionDto>,
+    movements: List<TransactionDto>,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -71,7 +69,7 @@ private fun HomeContent(
         }
 
         item { Text("Últimos movimientos", style = MaterialTheme.typography.titleMedium) }
-        items(transactions.take(5)) { TransactionRow(it) }
+        items(movements.take(5)) { TransactionRow(it) }
     }
 }
 
@@ -83,7 +81,7 @@ private fun HomeContentPreview() {
             balance = BigDecimal("1179.25"),
             totalIncome = BigDecimal("1500.00"),
             totalExpense = BigDecimal("320.75"),
-            transactions = listOf(
+            movements = listOf(
                 TransactionDto(
                     transaction = TransactionEntity(reason = "Salario", amount = BigDecimal("1500.00"), typeId = 1L),
                     type = CategoryEntity(id = 1L, name = "Salario", isIncome = true)

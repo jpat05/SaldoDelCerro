@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
-import com.movil.saldodelcerro.utils.getCategoryStyle
 
 @Composable
 fun CategoryChip(
