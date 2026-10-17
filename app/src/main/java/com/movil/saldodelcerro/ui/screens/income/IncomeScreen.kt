@@ -1,6 +1,8 @@
 package com.movil.saldodelcerro.ui.screens.income
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +13,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -28,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.ui.components.AddCategoryDialog
-import com.movil.saldodelcerro.ui.components.CategorySelector
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 
 @Composable
@@ -121,11 +126,12 @@ private fun IncomeContent(
         )
 
         // 2. Sección de Categorías de ingreso
-        CategorySelector(
-            types = incomeCategories,
-            selectedTypeId = selectedTypeId,
-            onTypeSelected = onTypeSelected,
-            onAddCategoryClick = onAddCategoryClick
+        CategoryDropdown(
+            categories = incomeCategories,
+            selectedId = selectedTypeId,
+            onSelected = onTypeSelected,
+            onAddCategory = onAddCategoryClick,
+            modifier = Modifier.fillMaxWidth()
         )
 
         // 3. Botón Registrar Ingreso (color de marca: primary)
@@ -148,6 +154,67 @@ private fun IncomeContent(
                 message,
                 color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
                 style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryDropdown(
+    categories: List<CategoryEntity>,
+    selectedId: Long,
+    onSelected: (Long) -> Unit,
+    onAddCategory: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedName = categories.firstOrNull { it.id == selectedId }?.name ?: "Sin categorías"
+
+    Box(modifier) {
+        OutlinedTextField(
+            value = selectedName,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Categoría") },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Ver categorías"
+                )
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small
+        )
+
+        Box(
+            Modifier
+                .matchParentSize()
+                .clickable { expanded = true }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            categories.forEach { category ->
+                DropdownMenuItem(
+                    text = { Text(category.name) },
+                    onClick = {
+                        onSelected(category.id)
+                        expanded = false
+                    }
+                )
+            }
+
+            HorizontalDivider()
+
+            DropdownMenuItem(
+                text = { Text("+ Nueva categoría") },
+                onClick = {
+                    expanded = false
+                    onAddCategory()
+                }
             )
         }
     }
