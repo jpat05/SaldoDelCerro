@@ -4,16 +4,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -21,14 +24,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -97,35 +103,43 @@ private fun IncomeContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(16.dp),
+            .padding(horizontal = 20.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Registrar ingreso",
-            style = MaterialTheme.typography.headlineMedium
+        Icon(
+            imageVector = Icons.Default.AddCircle,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.size(64.dp)
         )
 
-        // 1. Campo Monto con ícono
+        Text(
+            text = "Registra tu ingreso",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = "Ingresa el monto que recibiste.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
         OutlinedTextField(
             value = amountInput,
             onValueChange = onAmountChange,
             label = { Text("Monto") },
-            placeholder = { Text("Ej. 20.00") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Monto",
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-            },
-            suffix = { Text("$") },
+            placeholder = { Text("Ej. 100.00") },
+            prefix = { Text("$") },
+            textStyle = MaterialTheme.typography.headlineSmall,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small
         )
 
-        // 2. Sección de Categorías de ingreso
         CategoryDropdown(
             categories = incomeCategories,
             selectedId = selectedTypeId,
@@ -134,26 +148,50 @@ private fun IncomeContent(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // 3. Botón Registrar Ingreso (color de marca: primary)
         Button(
             onClick = onSubmit,
             enabled = amountInput.isNotBlank() && selectedTypeId > 0L && !isSubmitting,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
+                .height(52.dp),
             shape = MaterialTheme.shapes.small
         ) {
             Text(
-                "Registrar ingreso",
+                "Guardar ingreso",
                 style = MaterialTheme.typography.labelLarge
             )
         }
 
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "Los ingresos se suman a tu saldo disponible.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
         if (message != null) {
             Text(
-                message,
+                text = message,
                 color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
             )
         }
     }
