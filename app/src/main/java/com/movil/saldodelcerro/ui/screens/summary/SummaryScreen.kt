@@ -13,16 +13,15 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movil.saldodelcerro.data.models.CategoryEntity
 import com.movil.saldodelcerro.data.models.CategoryTotal
 import com.movil.saldodelcerro.data.models.TransactionDto
 import com.movil.saldodelcerro.data.models.TransactionEntity
-import com.movil.saldodelcerro.services.LedgerService
 import com.movil.saldodelcerro.ui.components.SummaryRow
 import com.movil.saldodelcerro.ui.components.TransactionRow
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
@@ -31,21 +30,17 @@ import java.math.BigDecimal
 
 @Composable
 fun SummaryScreen(
-    ledgerService: LedgerService,
+    viewModel: SummaryViewModel,
     modifier: Modifier = Modifier
 ) {
-    val balance by ledgerService.availableBalance.collectAsState(initial = BigDecimal.ZERO)
-    val totalIncome by ledgerService.totalIncome.collectAsState(initial = BigDecimal.ZERO)
-    val totalExpense by ledgerService.totalExpense.collectAsState(initial = BigDecimal.ZERO)
-    val categories by ledgerService.categoryTotals.collectAsState(initial = emptyList())
-    val movements by ledgerService.movements.collectAsState(initial = emptyList())
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     SummaryContent(
-        balance = balance,
-        totalIncome = totalIncome,
-        totalExpense = totalExpense,
-        categories = categories,
-        movements = movements,
+        balance = state.balance,
+        totalIncome = state.totalIncome,
+        totalExpense = state.totalExpense,
+        categories = state.categoryTotals,
+        movements = state.movements,
         modifier = modifier
     )
 }

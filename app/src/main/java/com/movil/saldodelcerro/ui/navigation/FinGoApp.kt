@@ -8,7 +8,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.movil.saldodelcerro.services.CategoryService
 import com.movil.saldodelcerro.services.LedgerService
+import com.movil.saldodelcerro.ui.appViewModelFactory
 import com.movil.saldodelcerro.ui.screens.expense.ExpenseScreen
 import com.movil.saldodelcerro.ui.screens.home.HomeScreen
 import com.movil.saldodelcerro.ui.screens.income.IncomeScreen
@@ -29,6 +32,10 @@ fun FinGoApp(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val viewModelFactory = remember(ledgerService, categoryService) {
+        appViewModelFactory(ledgerService, categoryService)
+    }
 
     Scaffold(
         bottomBar = {
@@ -57,10 +64,10 @@ fun FinGoApp(
             startDestination = "home",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("home") { HomeScreen(ledgerService) }
-            composable("income") { IncomeScreen(ledgerService, categoryService) }
-            composable("expenses") { ExpenseScreen(ledgerService, categoryService) }
-            composable("summary") { SummaryScreen(ledgerService) }
+            composable("home") { HomeScreen(viewModel(factory = viewModelFactory)) }
+            composable("income") { IncomeScreen(viewModel(factory = viewModelFactory)) }
+            composable("expenses") { ExpenseScreen(viewModel(factory = viewModelFactory)) }
+            composable("summary") { SummaryScreen(viewModel(factory = viewModelFactory)) }
         }
     }
 }

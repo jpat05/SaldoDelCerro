@@ -20,13 +20,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,112 +30,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movil.saldodelcerro.data.models.CategoryEntity
-import com.movil.saldodelcerro.data.models.LedgerResult
-import com.movil.saldodelcerro.data.models.TransactionEntity
-import com.movil.saldodelcerro.services.CategoryService
-import com.movil.saldodelcerro.services.LedgerService
 import com.movil.saldodelcerro.ui.components.AddCategoryDialog
 import com.movil.saldodelcerro.ui.components.CategorySelector
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
-import com.movil.saldodelcerro.utils.sanitizeMoneyInput
-import com.movil.saldodelcerro.utils.toMoneyOrNull
-import kotlinx.coroutines.launch
 
 @Composable
 fun IncomeScreen(
-    ledgerService: LedgerService,
-    categoryService: CategoryService,
+    viewModel: IncomeViewModel,
     modifier: Modifier = Modifier
 ) {
-    val incomeCategories by categoryService.incomeCategories.collectAsState(initial = emptyList())
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var amountInput by remember { mutableStateOf("") }
-    var reasonInput by remember { mutableStateOf("") }
-    var selectedTypeId by remember { mutableLongStateOf(0L) }
-    var message by remember { mutableStateOf<String?>(null) }
-    var isError by remember { mutableStateOf(false) }
-    var isSubmitting by remember { mutableStateOf(false) }
-
-    // Control para el diálogo emergente de nueva categoría
+    // Estado efímero del diálogo, puramente de UI
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var newCategoryName by remember { mutableStateOf("") }
 
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(incomeCategories) {
-        if (selectedTypeId == 0L && incomeCategories.isNotEmpty()) {
-            selectedTypeId = incomeCategories.first().id
-        }
-    }
-
     IncomeContent(
-        incomeCategories = incomeCategories,
-        amountInput = amountInput,
-        reasonInput = reasonInput,
-        selectedTypeId = selectedTypeId,
-        message = message,
-        isError = isError,
-        isSubmitting = isSubmitting,
-        onAmountChange = { amountInput = it.sanitizeMoneyInput() },
-        onReasonChange = { reasonInput = it },
-        onTypeSelected = { selectedTypeId = it },
+        incomeCategories = state.categories,
+        amountInput = state.amountInput,
+        reasonInput = state.reasonInput,
+        selectedTypeId = state.selectedCategoryId,
+        message = state.feedback?.message,
+        isError = state.feedback?.isError ?: false,
+        isSubmitting = state.isSubmitting,
+        onAmountChange = viewModel::onAmountChange,
+        onReasonChange = viewModel::onReasonChange,
+        onTypeSelected = viewModel::onCategorySelected,
         onAddCategoryClick = { showAddCategoryDialog = true },
-        onSubmit = {
-            val amount = amountInput.toMoneyOrNull()
-            val category = incomeCategories.find { it.id == selectedTypeId }
-            if (amount != null && category != null && !isSubmitting) {
-                scope.launch {
-                    isSubmitting = true
-                    val result = ledgerService.registerMovement(
-                        TransactionEntity(
-                            reason = reasonInput.ifBlank { "Ingreso" },
-                            amount = amount,
-                            typeId = category.id
-                        ),
-                        category
-                    )
-                    when (result) {
-                        LedgerResult.Accepted -> {
-                            message = "¡Ingreso registrado con éxito!"
-                            isError = false
-                            amountInput = ""
-                            reasonInput = ""
-                        }
-                        is LedgerResult.Rejected -> {
-                            message = when (result.reason) {
-                                LedgerResult.Reason.INSUFFICIENT_FUNDS ->
-                                    "No se pudo registrar el ingreso."
-                                LedgerResult.Reason.NON_POSITIVE_AMOUNT ->
-                                    "El monto debe ser mayor que cero."
-                            }
-                            isError = true
-                        }
-                    }
-                    isSubmitting = false
-                }
-            }
-        },
+        onSubmit = viewModel::submit,
         modifier = modifier
     )
 
-    // Diálogo para ingresar nueva categoría de ingreso usando `categoryService.add`
     if (showAddCategoryDialog) {
         AddCategoryDialog(
             name = newCategoryName,
             onNameChange = { newCategoryName = it },
             onConfirm = {
                 if (newCategoryName.isNotBlank()) {
-                    scope.launch {
-                        categoryService.add(
-                            CategoryEntity(
-                                name = newCategoryName.trim(),
-                                isIncome = true
-                            )
-                        )
-                        newCategoryName = ""
-                        showAddCategoryDialog = false
-                    }
+                    viewModel.addCategory(newCategoryName)
+                    newCategoryName = ""
+                    showAddCategoryDialog = false
                 }
             },
             onDismiss = { showAddCategoryDialog = false }
