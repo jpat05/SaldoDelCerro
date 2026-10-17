@@ -23,7 +23,9 @@ fun CategoryDonutChart(
     modifier: Modifier = Modifier
 ) {
     // Solo categorías con gasto
-    val visibles = categories.filter { it.total > BigDecimal.ZERO }
+    val visibles = categories
+        .filter { it.total > BigDecimal.ZERO }
+        .sortedByDescending { it.total }
     val total = visibles.fold(BigDecimal.ZERO) { acc, c -> acc + c.total }
     if (total <= BigDecimal.ZERO) return
 
