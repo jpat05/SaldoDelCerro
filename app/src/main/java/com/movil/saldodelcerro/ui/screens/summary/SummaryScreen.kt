@@ -3,13 +3,14 @@ package com.movil.saldodelcerro.ui.screens.summary
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,10 +24,10 @@ import com.movil.saldodelcerro.data.models.CategoryTotal
 import com.movil.saldodelcerro.data.models.TransactionDto
 import com.movil.saldodelcerro.data.models.TransactionEntity
 import com.movil.saldodelcerro.services.LedgerService
+import com.movil.saldodelcerro.ui.components.CategoryDonutChart
 import com.movil.saldodelcerro.ui.components.SummaryRow
 import com.movil.saldodelcerro.ui.components.TransactionRow
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
-import com.movil.saldodelcerro.utils.formatMoney
 import java.math.BigDecimal
 
 @Composable
@@ -59,8 +60,6 @@ private fun SummaryContent(
     movements: List<TransactionDto>,
     modifier: Modifier = Modifier
 ) {
-    val maxCategory = categories.maxOfOrNull { it.total } ?: BigDecimal.ONE
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -83,16 +82,8 @@ private fun SummaryContent(
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp)) {
                     Text("Gastos por categoría", style = MaterialTheme.typography.titleMedium)
-                    categories.filter { it.total > BigDecimal.ZERO }.forEach { cat ->
-                        Text(cat.name, style = MaterialTheme.typography.titleSmall)
-                        LinearProgressIndicator(
-                            progress = {
-                                (cat.total.toFloat() / maxCategory.toFloat()).coerceIn(0f, 1f)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Text(cat.total.formatMoney(), style = MaterialTheme.typography.bodySmall)
-                    }
+                    Spacer(Modifier.height(12.dp))
+                    CategoryDonutChart(categories)
                 }
             }
         }
