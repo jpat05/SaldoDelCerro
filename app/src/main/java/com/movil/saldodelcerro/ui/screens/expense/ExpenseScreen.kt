@@ -7,139 +7,67 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movil.saldodelcerro.data.models.CategoryEntity
-import com.movil.saldodelcerro.data.models.LedgerResult
-import com.movil.saldodelcerro.data.models.TransactionEntity
-import com.movil.saldodelcerro.services.CategoryService
-import com.movil.saldodelcerro.services.LedgerService
 import com.movil.saldodelcerro.ui.components.AddCategoryDialog
 import com.movil.saldodelcerro.ui.components.CategorySelector
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
-import com.movil.saldodelcerro.utils.sanitizeMoneyInput
-import com.movil.saldodelcerro.utils.toMoneyOrNull
-import kotlinx.coroutines.launch
 
 @Composable
 fun ExpenseScreen(
-    ledgerService: LedgerService,
-    categoryService: CategoryService,
+    viewModel: ExpenseViewModel,
     modifier: Modifier = Modifier
 ) {
-    val expenseCategories by categoryService.expenseCategories.collectAsState(initial = emptyList())
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var amountInput by remember { mutableStateOf("") }
-    var reasonInput by remember { mutableStateOf("") }
-    var selectedTypeId by remember { mutableLongStateOf(0L) }
-    var message by remember { mutableStateOf<String?>(null) }
-    var isError by remember { mutableStateOf(false) }
-    var isSubmitting by remember { mutableStateOf(false) }
-
-    // Control para el diálogo emergente de nueva categoría
+    // Estado efímero del diálogo, puramente de UI
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var newCategoryName by remember { mutableStateOf("") }
 
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(expenseCategories) {
-        if (selectedTypeId == 0L && expenseCategories.isNotEmpty()) {
-            selectedTypeId = expenseCategories.first().id
-        }
-    }
-
     ExpenseContent(
-        expenseCategories = expenseCategories,
-        amountInput = amountInput,
-        reasonInput = reasonInput,
-        selectedTypeId = selectedTypeId,
-        message = message,
-        isError = isError,
-        isSubmitting = isSubmitting,
-        onAmountChange = { amountInput = it.sanitizeMoneyInput() },
-        onReasonChange = { reasonInput = it },
-        onTypeSelected = { selectedTypeId = it },
+        expenseCategories = state.categories,
+        amountInput = state.amountInput,
+        reasonInput = state.reasonInput,
+        selectedTypeId = state.selectedCategoryId,
+        message = state.feedback?.message,
+        isError = state.feedback?.isError ?: false,
+        isSubmitting = state.isSubmitting,
+        onAmountChange = viewModel::onAmountChange,
+        onReasonChange = viewModel::onReasonChange,
+        onTypeSelected = viewModel::onCategorySelected,
         onAddCategoryClick = { showAddCategoryDialog = true },
-        onSubmit = {
-            val amount = amountInput.toMoneyOrNull()
-            val category = expenseCategories.find { it.id == selectedTypeId }
-            if (amount != null && category != null && !isSubmitting) {
-                scope.launch {
-                    isSubmitting = true
-                    val result = ledgerService.registerMovement(
-                        TransactionEntity(
-                            reason = reasonInput.ifBlank { "Egreso" },
-                            amount = amount,
-                            typeId = category.id
-                        ),
-                        category
-                    )
-                    when (result) {
-                        LedgerResult.Accepted -> {
-                            message = "¡Gasto registrado con éxito!"
-                            isError = false
-                            amountInput = ""
-                            reasonInput = ""
-                        }
-                        is LedgerResult.Rejected -> {
-                            message = when (result.reason) {
-                                LedgerResult.Reason.INSUFFICIENT_FUNDS ->
-                                    "Saldo insuficiente para registrar este gasto."
-                                LedgerResult.Reason.NON_POSITIVE_AMOUNT ->
-                                    "El monto debe ser mayor que cero."
-                            }
-                            isError = true
-                        }
-                    }
-                    isSubmitting = false
-                }
-            }
-        },
+        onSubmit = viewModel::submit,
         modifier = modifier
     )
 
-    // Diálogo para ingresar nueva categoría usando `categoryService.add`
     if (showAddCategoryDialog) {
         AddCategoryDialog(
             name = newCategoryName,
             onNameChange = { newCategoryName = it },
             onConfirm = {
                 if (newCategoryName.isNotBlank()) {
-                    scope.launch {
-                        categoryService.add(
-                            CategoryEntity(
-                                name = newCategoryName.trim(),
-                                isIncome = false
-                            )
-                        )
-                        newCategoryName = ""
-                        showAddCategoryDialog = false
-                    }
+                    viewModel.addCategory(newCategoryName)
+                    newCategoryName = ""
+                    showAddCategoryDialog = false
                 }
             },
             onDismiss = { showAddCategoryDialog = false }
@@ -174,8 +102,7 @@ private fun ExpenseContent(
     ) {
         Text(
             text = "Registrar gasto",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.headlineMedium
         )
 
         // 1. Campo Monto con ícono
@@ -188,14 +115,14 @@ private fun ExpenseContent(
                 Icon(
                     imageVector = Icons.Default.RemoveCircle,
                     contentDescription = "Monto",
-                    tint = Color(0xFFE57373)
+                    tint = MaterialTheme.colorScheme.error
                 )
             },
             suffix = { Text("$") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = MaterialTheme.shapes.small
         )
 
         // 2. Campo Descripción con ícono
@@ -208,12 +135,12 @@ private fun ExpenseContent(
                 Icon(
                     imageVector = Icons.Default.Description,
                     contentDescription = "Descripción",
-                    tint = Color(0xFFE57373)
+                    tint = MaterialTheme.colorScheme.error
                 )
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = MaterialTheme.shapes.small
         )
 
         // 3. Sección de Categorías ordenadas en filas simétricas
@@ -224,32 +151,26 @@ private fun ExpenseContent(
             onAddCategoryClick = onAddCategoryClick
         )
 
-        // 4. Botón Registrar Gasto
+        // 4. Botón Registrar Gasto (color de marca: primary)
         Button(
             onClick = onSubmit,
             enabled = amountInput.isNotBlank() && selectedTypeId > 0L && !isSubmitting,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFE67E53)
-            )
+            shape = MaterialTheme.shapes.small
         ) {
             Text(
                 "Registrar gasto",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.labelLarge
             )
         }
 
         if (message != null) {
             Text(
                 message,
-                color = if (isError) Color(0xFFC62828) else Color(0xFF4CAF50),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }

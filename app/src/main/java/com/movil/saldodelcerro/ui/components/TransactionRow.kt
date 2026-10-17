@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.movil.saldodelcerro.data.models.CategoryEntity
@@ -36,7 +35,7 @@ fun TransactionRow(dto: TransactionDto) {
             Text(
                 text = (if (dto.type.isIncome) "+" else "-") + dto.transaction.amount.formatMoney(),
                 style = MaterialTheme.typography.titleMedium,
-                color = if (dto.type.isIncome) Color(0xFF2E7D32) else Color(0xFFC62828)
+                color = if (dto.type.isIncome) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
             )
         }
     }
