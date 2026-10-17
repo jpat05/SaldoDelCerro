@@ -1,5 +1,6 @@
 package com.movil.saldodelcerro.views
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -66,6 +68,10 @@ fun ExpenseScreen(
     // Control para el diálogo emergente de nueva categoría
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var newCategoryName by remember { mutableStateOf("") }
+
+    // Control para eliminar categoría (mantener presionado)
+    var categoryToDelete by remember { mutableStateOf<TransactionTypeEntity?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -127,7 +133,7 @@ fun ExpenseScreen(
             shape = RoundedCornerShape(12.dp)
         )
 
-        // 3. Sección de Categorías ordenadas en filas simétricas
+        // 3. Sección de Categorías con opciones arriba e iconos abajo
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -160,31 +166,42 @@ fun ExpenseScreen(
                             val isSelected = selectedTypeId == type.id
 
                             Surface(
-                                onClick = { selectedTypeId = type.id },
-                                shape = RoundedCornerShape(24.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 color = if (isSelected) style.tintColor else style.backgroundColor,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(48.dp)
+                                    .height(72.dp)
+                                    .pointerInput(type) {
+                                        detectTapGestures(
+                                            onTap = { selectedTypeId = type.id },
+                                            onLongPress = {
+                                                categoryToDelete = type
+                                                showDeleteDialog = true
+                                            }
+                                        )
+                                    }
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Start
+                                // Distribución: Opción (Texto) arriba e Icono abajo
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(8.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
                                 ) {
-                                    Icon(
-                                        imageVector = style.icon,
-                                        contentDescription = type.name,
-                                        tint = if (isSelected) Color.White else style.tintColor,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = type.name,
                                         color = if (isSelected) Color.White else style.textColor,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Icon(
+                                        imageVector = style.icon,
+                                        contentDescription = type.name,
+                                        tint = if (isSelected) Color.White else style.tintColor,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
@@ -256,7 +273,7 @@ fun ExpenseScreen(
         }
     }
 
-    // Diálogo para ingresar nueva categoría usando `walletService.insertType`
+    // Diálogo para ingresar nueva categoría
     if (showAddCategoryDialog) {
         AlertDialog(
             onDismissRequest = { showAddCategoryDialog = false },
@@ -292,6 +309,38 @@ fun ExpenseScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showAddCategoryDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo para confirmar la eliminación de una categoría
+    if (showDeleteDialog && categoryToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Eliminar categoría") },
+            text = { Text("¿Estás seguro de que deseas eliminar la categoría \"${categoryToDelete?.name}\"?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            categoryToDelete?.let { type ->
+                                walletService.deleteType(type)
+                                if (selectedTypeId == type.id) {
+                                    selectedTypeId = expenseTypes.firstOrNull { it.id != type.id }?.id ?: 0L
+                                }
+                            }
+                            showDeleteDialog = false
+                            categoryToDelete = null
+                        }
+                    }
+                ) {
+                    Text("Eliminar", color = Color(0xFFE57373))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
                     Text("Cancelar")
                 }
             }
