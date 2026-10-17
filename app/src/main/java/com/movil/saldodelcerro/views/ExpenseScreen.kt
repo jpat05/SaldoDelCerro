@@ -51,7 +51,6 @@ import com.movil.saldodelcerro.data.models.TransactionTypeEntity
 import com.movil.saldodelcerro.services.WalletService
 import com.movil.saldodelcerro.utils.getCategoryStyle
 import kotlinx.coroutines.launch
-
 @Composable
 fun ExpenseScreen(
     walletService: WalletService,
