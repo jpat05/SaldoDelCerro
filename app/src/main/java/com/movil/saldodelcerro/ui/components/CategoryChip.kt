@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -15,8 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.movil.saldodelcerro.data.models.CategoryEntity
@@ -32,7 +29,7 @@ fun CategoryChip(
     val style = getCategoryStyle(type.name)
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         color = if (isSelected) style.tintColor else style.backgroundColor,
         modifier = modifier.height(48.dp)
     ) {
@@ -44,15 +41,14 @@ fun CategoryChip(
             Icon(
                 imageVector = style.icon,
                 contentDescription = type.name,
-                tint = if (isSelected) Color.White else style.tintColor,
+                tint = if (isSelected) style.onTintColor else style.tintColor,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = type.name,
-                color = if (isSelected) Color.White else style.textColor,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
+                color = if (isSelected) style.onTintColor else style.textColor,
+                style = MaterialTheme.typography.labelLarge,
                 maxLines = 1
             )
         }

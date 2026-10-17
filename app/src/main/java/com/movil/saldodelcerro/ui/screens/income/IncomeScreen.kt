@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -25,8 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -106,8 +102,7 @@ private fun IncomeContent(
     ) {
         Text(
             text = "Registrar ingreso",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.headlineMedium
         )
 
         // 1. Campo Monto con ícono
@@ -120,14 +115,14 @@ private fun IncomeContent(
                 Icon(
                     imageVector = Icons.Default.AddCircle,
                     contentDescription = "Monto",
-                    tint = Color(0xFF66BB6A)
+                    tint = MaterialTheme.colorScheme.tertiary
                 )
             },
             suffix = { Text("$") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = MaterialTheme.shapes.small
         )
 
         // 2. Campo Descripción con ícono
@@ -140,12 +135,12 @@ private fun IncomeContent(
                 Icon(
                     imageVector = Icons.Default.Description,
                     contentDescription = "Descripción",
-                    tint = Color(0xFF66BB6A)
+                    tint = MaterialTheme.colorScheme.tertiary
                 )
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = MaterialTheme.shapes.small
         )
 
         // 3. Sección de Categorías de ingreso
@@ -156,32 +151,26 @@ private fun IncomeContent(
             onAddCategoryClick = onAddCategoryClick
         )
 
-        // 4. Botón Registrar Ingreso
+        // 4. Botón Registrar Ingreso (color de marca: primary)
         Button(
             onClick = onSubmit,
             enabled = amountInput.isNotBlank() && selectedTypeId > 0L && !isSubmitting,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2E7D32)
-            )
+            shape = MaterialTheme.shapes.small
         ) {
             Text(
                 "Registrar ingreso",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.labelLarge
             )
         }
 
         if (message != null) {
             Text(
                 message,
-                color = if (isError) Color(0xFFC62828) else Color(0xFF4CAF50),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
