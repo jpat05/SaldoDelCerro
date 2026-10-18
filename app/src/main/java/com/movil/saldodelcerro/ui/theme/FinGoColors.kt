@@ -48,6 +48,11 @@ private val NeutralSoft = Color(0xFFE0E0E0)
 private val NeutralDark = Color(0xFFBDBDBD)
 private val NeutralSoftDark = Color(0xFF2A2E33)
 
+private val Teal = Color(0xFF00796B)
+private val TealSoft = Color(0xFFB2DFDB)
+private val TealDark = Color(0xFF4DB6AC)
+private val TealSoftDark = Color(0xFF13332E)
+
 val LightFinGoColors = FinGoColors(
     income = FinGoGreen,
     incomeContainer = FinGoGreenSoft,
@@ -59,7 +64,8 @@ val LightFinGoColors = FinGoColors(
         CategoryChipColors(VioletSoft, Violet, FinGoBackground), // estudios
         CategoryChipColors(AmberSoft, Amber, FinGoBackground), // entretenimiento
         CategoryChipColors(FinGoRedSoft, FinGoRed, FinGoBackground), // salud
-        CategoryChipColors(NeutralSoft, Neutral, FinGoBackground) // resto
+        CategoryChipColors(NeutralSoft, Neutral, FinGoBackground), // resto
+        CategoryChipColors(TealSoft, Teal, FinGoBackground) // vivienda
     )
 )
 
@@ -74,7 +80,8 @@ val DarkFinGoColors = FinGoColors(
         CategoryChipColors(VioletSoftDark, VioletDark, FinGoBackgroundDark),
         CategoryChipColors(AmberSoftDark, AmberDark, FinGoBackgroundDark),
         CategoryChipColors(FinGoRedSoftDark, FinGoRedDark, FinGoBackgroundDark),
-        CategoryChipColors(NeutralSoftDark, NeutralDark, FinGoBackgroundDark)
+        CategoryChipColors(NeutralSoftDark, NeutralDark, FinGoBackgroundDark),
+        CategoryChipColors(TealSoftDark, TealDark, FinGoBackgroundDark)
     )
 )
 

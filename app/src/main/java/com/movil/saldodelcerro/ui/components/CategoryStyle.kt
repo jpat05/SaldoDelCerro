@@ -1,6 +1,7 @@
 package com.movil.saldodelcerro.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -26,16 +27,26 @@ fun getCategoryStyle(categoryName: String): CategoryStyle {
     val palette = MaterialTheme.finGo.categoryPalette
 
     val (icon, chip) = when (key) {
-        "alimentación", "alimentacion", "comida" ->
+        "alimentaci��n", "alimentacion", "comida" ->
             Icons.Default.Restaurant to palette[0]
         "transporte" ->
             Icons.Default.DirectionsCar to palette[1]
-        "estudios", "educación", "educacion" ->
+        "estudios", "educaci��n", "educacion" ->
             Icons.Default.School to palette[2]
         "entretenimiento", "ocio" ->
             Icons.Default.SportsEsports to palette[3]
         "salud" ->
             Icons.Default.Favorite to palette[4]
+        "vivienda", "casa", "hogar" ->
+            Icons.Default.Home to palette[6]
+        "salario", "sueldo", "nomina" ->
+            Icons.Default.AccountBalanceWallet to palette[0]
+        "freelance", "independiente", "contrato" ->
+            Icons.Default.Work to palette[1]
+        "otros ingresos", "otros" ->
+            Icons.AutoMirrored.Filled.TrendingUp to palette[5]
+        "otros gastos", "compras", "supermercado" ->
+            Icons.Default.ShoppingCart to palette[5]
         else ->
             Icons.Default.MoreHoriz to palette[5]
     }
