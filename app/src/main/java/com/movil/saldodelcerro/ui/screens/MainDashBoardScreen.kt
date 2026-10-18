@@ -11,9 +11,6 @@ import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 
 @Composable
 fun MainDashboardScreen(modifier: Modifier = Modifier) {
-    /* TODO: Mondongo
-    * TODO: Pues Hagan las cosas aquí
-    *  */
     MainDashboardContent(modifier = modifier)
 }
 
@@ -23,7 +20,7 @@ private fun MainDashboardContent(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "Me fumo cuatro porros")
+        Text(text = "Hello Android")
     }
 }
 

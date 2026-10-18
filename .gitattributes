@@ -1,0 +1,19 @@
+# Normalize line endings: store LF in the repository, check out LF.
+# Prevents the CRLF churn that a Windows editor / ZIP download introduces.
+* text=auto eol=lf
+
+# Windows batch scripts must keep CRLF or cmd.exe mis-parses them.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Never touch binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.jar binary
+*.apk binary
+*.aab binary
+*.keystore binary
+*.jks binary

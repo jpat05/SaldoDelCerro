@@ -24,8 +24,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.movil.saldodelcerro.ui.theme.FinGoMuted
-import com.movil.saldodelcerro.ui.theme.FinGoSurface
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 import com.movil.saldodelcerro.ui.theme.finGo
 import com.movil.saldodelcerro.utils.formatMoney
@@ -50,7 +48,10 @@ fun SummaryCard(
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = FinGoSurface),
+        // `surfaceContainerLow` es el mismo FinGoSurface en claro y FinGoSurfaceDark en oscuro.
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -74,7 +75,12 @@ fun SummaryCard(
                     modifier = Modifier.size(22.dp)
                 )
             }
-            Text(label, style = MaterialTheme.typography.labelLarge, color = FinGoMuted)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                // `secondary` es FinGoMuted en claro y FinGoMutedDark en oscuro.
+                color = MaterialTheme.colorScheme.secondary
+            )
             Text(
                 text = value.formatMoney(),
                 style = MaterialTheme.typography.titleMedium,

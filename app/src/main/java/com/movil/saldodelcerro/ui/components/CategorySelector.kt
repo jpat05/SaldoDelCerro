@@ -20,12 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.movil.saldodelcerro.data.models.CategoryEntity
+import com.movil.saldodelcerro.domain.model.Category
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 
 @Composable
 fun CategorySelector(
-    types: List<CategoryEntity>,
+    types: List<Category>,
     selectedTypeId: Long,
     onTypeSelected: (Long) -> Unit,
     onAddCategoryClick: () -> Unit,
@@ -91,11 +91,11 @@ private fun CategorySelectorPreview() {
     SaldoDelCerroTheme(dynamicColor = false) {
         CategorySelector(
             types = listOf(
-                CategoryEntity(id = 1L, name = "Comida", isIncome = false),
-                CategoryEntity(id = 2L, name = "Transporte", isIncome = false),
-                CategoryEntity(id = 3L, name = "Ocio", isIncome = false),
-                CategoryEntity(id = 4L, name = "Salud", isIncome = false),
-                CategoryEntity(id = 5L, name = "Otros", isIncome = false)
+                Category(id = 1L, name = "Comida", isIncome = false),
+                Category(id = 2L, name = "Transporte", isIncome = false),
+                Category(id = 3L, name = "Ocio", isIncome = false),
+                Category(id = 4L, name = "Salud", isIncome = false),
+                Category(id = 5L, name = "Otros", isIncome = false)
             ),
             selectedTypeId = 2L,
             onTypeSelected = {},

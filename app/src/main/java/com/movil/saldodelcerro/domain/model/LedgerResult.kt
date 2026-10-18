@@ -1,4 +1,4 @@
-package com.movil.saldodelcerro.data.models
+package com.movil.saldodelcerro.domain.model
 
 /**
  * Outcome of a ledger write (registering a movement, archiving a category) that a business rule

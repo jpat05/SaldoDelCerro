@@ -16,12 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.movil.saldodelcerro.data.models.CategoryEntity
+import com.movil.saldodelcerro.domain.model.Category
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 
 @Composable
 fun CategoryChip(
-    type: CategoryEntity,
+    type: Category,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -61,12 +61,12 @@ private fun CategoryChipPreview() {
     SaldoDelCerroTheme(dynamicColor = false) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             CategoryChip(
-                type = CategoryEntity(id = 1L, name = "Comida", isIncome = false),
+                type = Category(id = 1L, name = "Comida", isIncome = false),
                 isSelected = false,
                 onClick = {}
             )
             CategoryChip(
-                type = CategoryEntity(id = 2L, name = "Transporte", isIncome = false),
+                type = Category(id = 2L, name = "Transporte", isIncome = false),
                 isSelected = true,
                 onClick = {}
             )

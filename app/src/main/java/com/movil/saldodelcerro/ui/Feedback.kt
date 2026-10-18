@@ -1,9 +1,6 @@
 package com.movil.saldodelcerro.ui
 
-import com.movil.saldodelcerro.data.models.LedgerResult
-
-/** Transient success/error message surfaced by a screen. */
-data class UiFeedback(val message: String, val isError: Boolean)
+import com.movil.saldodelcerro.domain.model.LedgerResult
 
 /** Maps a rejection reason to the message shown to the user. */
 fun LedgerResult.Reason.defaultMessage(isIncome: Boolean): String = when (this) {

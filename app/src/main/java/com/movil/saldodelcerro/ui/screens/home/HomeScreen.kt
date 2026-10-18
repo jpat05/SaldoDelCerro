@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,12 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.movil.saldodelcerro.data.models.CategoryEntity
-import com.movil.saldodelcerro.data.models.TransactionDto
-import com.movil.saldodelcerro.data.models.TransactionEntity
+import com.movil.saldodelcerro.ui.UiState
 import com.movil.saldodelcerro.ui.components.BalanceCard
 import com.movil.saldodelcerro.ui.components.SummaryCard
-import com.movil.saldodelcerro.ui.components.TransactionRow
+import com.movil.saldodelcerro.ui.components.UiStateError
+import com.movil.saldodelcerro.ui.components.UiStateLoading
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 import java.math.BigDecimal
 
@@ -29,15 +27,20 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    HomeContent(
-        balance = state.balance,
-        totalIncome = state.totalIncome,
-        totalExpense = state.totalExpense,
-        movements = state.recentMovements,
-        modifier = modifier
-    )
+    when (val state = uiState) {
+        is UiState.Loading -> UiStateLoading(modifier)
+
+        is UiState.Error -> UiStateError(message = state.message, modifier = modifier)
+
+        is UiState.Success -> HomeContent(
+            balance = state.data.balance,
+            totalIncome = state.data.totalIncome,
+            totalExpense = state.data.totalExpense,
+            modifier = modifier
+        )
+    }
 }
 
 @Composable
@@ -45,7 +48,6 @@ private fun HomeContent(
     balance: BigDecimal,
     totalIncome: BigDecimal,
     totalExpense: BigDecimal,
-    movements: List<TransactionDto>,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -53,19 +55,17 @@ private fun HomeContent(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item { Text("Saldo desde el Cerro", style = MaterialTheme.typography.headlineMedium) }
+        item { Text("FinGO", style = MaterialTheme.typography.headlineMedium) }
 
         item { BalanceCard(balance) }
 
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                SummaryCard("Ingresos", totalIncome, Modifier.weight(1f))
-                SummaryCard("Egresos", totalExpense, Modifier.weight(1f))
+                SummaryCard("Ingresos", totalIncome, true, Modifier.weight(1f))
+                SummaryCard("Egresos", totalExpense, false, Modifier.weight(1f))
             }
         }
 
-        item { Text("Últimos movimientos", style = MaterialTheme.typography.titleMedium) }
-        items(movements) { TransactionRow(it) }
     }
 }
 
@@ -77,20 +77,6 @@ private fun HomeContentPreview() {
             balance = BigDecimal("1179.25"),
             totalIncome = BigDecimal("1500.00"),
             totalExpense = BigDecimal("320.75"),
-            movements = listOf(
-                TransactionDto(
-                    transaction = TransactionEntity(reason = "Salario", amount = BigDecimal("1500.00"), typeId = 1L),
-                    type = CategoryEntity(id = 1L, name = "Salario", isIncome = true)
-                ),
-                TransactionDto(
-                    transaction = TransactionEntity(reason = "Compra supermercado", amount = BigDecimal("120.50"), typeId = 2L),
-                    type = CategoryEntity(id = 2L, name = "Comida", isIncome = false)
-                ),
-                TransactionDto(
-                    transaction = TransactionEntity(reason = "Pasaje", amount = BigDecimal("2.25"), typeId = 3L),
-                    type = CategoryEntity(id = 3L, name = "Transporte", isIncome = false)
-                )
-            )
         )
     }
 }

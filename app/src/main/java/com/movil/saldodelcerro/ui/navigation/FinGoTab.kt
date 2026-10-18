@@ -7,9 +7,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.ui.graphics.vector.ImageVector
 
-internal enum class FinGoTab(val label: String, val icon: ImageVector) {
-    Home("Inicio", Icons.Filled.Home),
-    Income("Capital", Icons.Filled.AccountBalanceWallet),
-    Expenses("Egresos", Icons.Filled.RemoveCircle),
-    Summary("Resumen", Icons.AutoMirrored.Filled.List)
+internal enum class FinGoTab(val label: String, val icon: ImageVector, val route: FinGoRoute) {
+    Home("Inicio", Icons.Filled.Home, FinGoRoute.Home),
+    Income("Ingresos", Icons.Filled.AccountBalanceWallet, FinGoRoute.Income),
+    Expenses("Egresos", Icons.Filled.RemoveCircle, FinGoRoute.Expenses),
+    Summary("Resumen", Icons.AutoMirrored.Filled.List, FinGoRoute.Summary)
 }

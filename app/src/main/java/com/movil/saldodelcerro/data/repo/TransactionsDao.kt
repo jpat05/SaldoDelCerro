@@ -15,9 +15,14 @@ interface TransactionsDao {
     @Query("SELECT * FROM transactions ORDER BY generatedDate DESC")
     fun getAllOrderByDateDesc(): Flow<List<TransactionDto>>
 
+    /**
+     * Single movement with its category already resolved. `suspend` on purpose: Room runs it on its
+     * own executor instead of the caller's thread (a blocking DAO call throws on the main thread),
+     * which is what the other two read paths have always done.
+     */
     @Transaction
     @Query("SELECT * FROM transactions WHERE id = :id")
-    fun getById(id: Long): TransactionDto?
+    suspend fun getById(id: Long): TransactionDto?
 
     @Insert
     suspend fun insert(transaction: TransactionEntity)

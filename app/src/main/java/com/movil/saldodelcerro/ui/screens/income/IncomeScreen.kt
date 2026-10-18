@@ -1,6 +1,5 @@
 package com.movil.saldodelcerro.ui.screens.income
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,18 +14,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,8 +36,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.movil.saldodelcerro.data.models.CategoryEntity
+import com.movil.saldodelcerro.domain.model.Category
+import com.movil.saldodelcerro.ui.UiEvent
+import com.movil.saldodelcerro.ui.UiState
 import com.movil.saldodelcerro.ui.components.AddCategoryDialog
+import com.movil.saldodelcerro.ui.components.CategoryChipVisual
+import com.movil.saldodelcerro.ui.components.CategoryGrid
+import com.movil.saldodelcerro.ui.components.GridCategory
+import com.movil.saldodelcerro.ui.components.UiStateError
+import com.movil.saldodelcerro.ui.components.UiStateLoading
+import com.movil.saldodelcerro.ui.components.getCategoryStyle
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 
 @Composable
@@ -47,25 +53,49 @@ fun IncomeScreen(
     viewModel: IncomeViewModel,
     modifier: Modifier = Modifier
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // Estado efímero del diálogo, puramente de UI
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var newCategoryName by remember { mutableStateOf("") }
 
-    IncomeContent(
-        incomeCategories = state.categories,
-        amountInput = state.amountInput,
-        selectedTypeId = state.selectedCategoryId,
-        message = state.feedback?.message,
-        isError = state.feedback?.isError ?: false,
-        isSubmitting = state.isSubmitting,
-        onAmountChange = viewModel::onAmountChange,
-        onTypeSelected = viewModel::onCategorySelected,
-        onAddCategoryClick = { showAddCategoryDialog = true },
-        onSubmit = viewModel::submit,
-        modifier = modifier
-    )
+    // [FUNCIONALIDAD: EVENTOS PUNTUALES]
+    // Proposito: los mensajes de exito/rechazo llegan por el Channel del ViewModel y se muestran
+    // una sola vez como Snackbar. Al no vivir en el estado, un cambio de configuracion no los repite.
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is UiEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
+            }
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        when (val state = uiState) {
+            is UiState.Loading -> UiStateLoading()
+
+            is UiState.Error -> UiStateError(message = state.message)
+
+            is UiState.Success -> IncomeContent(
+                incomeCategories = state.data.categories,
+                amountInput = state.data.amountInput,
+                selectedTypeId = state.data.selectedCategoryId,
+                isSubmitting = state.data.isSubmitting,
+                onAmountChange = viewModel::onAmountChange,
+                onTypeSelected = viewModel::onCategorySelected,
+                onAddCategoryClick = { showAddCategoryDialog = true },
+                onSubmit = viewModel::submit
+            )
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        )
+    }
 
     if (showAddCategoryDialog) {
         AddCategoryDialog(
@@ -85,11 +115,9 @@ fun IncomeScreen(
 
 @Composable
 private fun IncomeContent(
-    incomeCategories: List<CategoryEntity>,
+    incomeCategories: List<Category>,
     amountInput: String,
     selectedTypeId: Long,
-    message: String?,
-    isError: Boolean,
     isSubmitting: Boolean,
     onAmountChange: (String) -> Unit,
     onTypeSelected: (Long) -> Unit,
@@ -98,6 +126,7 @@ private fun IncomeContent(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val gridCategories = incomeCategories.map { GridCategory(it.id, it.name) }
 
     Column(
         modifier = modifier
@@ -140,12 +169,22 @@ private fun IncomeContent(
             shape = MaterialTheme.shapes.small
         )
 
-        CategoryDropdown(
-            categories = incomeCategories,
-            selectedId = selectedTypeId,
-            onSelected = onTypeSelected,
-            onAddCategory = onAddCategoryClick,
-            modifier = Modifier.fillMaxWidth()
+        // Selector unico de categoria: cuadricula de 3 columnas con "+" como ultimo circulo.
+        CategoryGrid(
+            categories = gridCategories,
+            selectedTypeId = selectedTypeId,
+            onTypeSelected = onTypeSelected,
+            onAddCategoryClick = onAddCategoryClick,
+            visualProvider = { name ->
+                getCategoryStyle(name).let { style ->
+                    CategoryChipVisual(
+                        icon = style.icon,
+                        containerColor = style.backgroundColor,
+                        accentColor = style.tintColor,
+                        onAccentColor = style.onTintColor
+                    )
+                }
+            }
         )
 
         Button(
@@ -185,76 +224,6 @@ private fun IncomeContent(
                 )
             }
         }
-
-        if (message != null) {
-            Text(
-                text = message,
-                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-private fun CategoryDropdown(
-    categories: List<CategoryEntity>,
-    selectedId: Long,
-    onSelected: (Long) -> Unit,
-    onAddCategory: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val selectedName = categories.firstOrNull { it.id == selectedId }?.name ?: "Sin categorías"
-
-    Box(modifier) {
-        OutlinedTextField(
-            value = selectedName,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Categoría") },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Ver categorías"
-                )
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.small
-        )
-
-        Box(
-            Modifier
-                .matchParentSize()
-                .clickable { expanded = true }
-        )
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            categories.forEach { category ->
-                DropdownMenuItem(
-                    text = { Text(category.name) },
-                    onClick = {
-                        onSelected(category.id)
-                        expanded = false
-                    }
-                )
-            }
-
-            HorizontalDivider()
-
-            DropdownMenuItem(
-                text = { Text("+ Nueva categoría") },
-                onClick = {
-                    expanded = false
-                    onAddCategory()
-                }
-            )
-        }
     }
 }
 
@@ -264,19 +233,31 @@ private fun IncomeContentPreview() {
     SaldoDelCerroTheme(dynamicColor = false) {
         IncomeContent(
             incomeCategories = listOf(
-                CategoryEntity(id = 1L, name = "Salario", isIncome = true),
-                CategoryEntity(id = 2L, name = "Freelance", isIncome = true),
-                CategoryEntity(id = 3L, name = "Otros ingresos", isIncome = true)
+                Category(id = 1L, name = "Salario", isIncome = true),
+                Category(id = 2L, name = "Freelance", isIncome = true),
+                Category(id = 3L, name = "Otros ingresos", isIncome = true)
             ),
             amountInput = "1500",
             selectedTypeId = 1L,
-            message = "¡Ingreso registrado con éxito!",
-            isError = false,
             isSubmitting = false,
             onAmountChange = {},
             onTypeSelected = {},
             onAddCategoryClick = {},
             onSubmit = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "IncomeScreen - Diálogo")
+@Composable
+private fun IncomeDialogPreview() {
+    var name by remember { mutableStateOf("Mascotas") }
+    SaldoDelCerroTheme(dynamicColor = false) {
+        AddCategoryDialog(
+            name = name,
+            onNameChange = { name = it },
+            onConfirm = {},
+            onDismiss = {}
         )
     }
 }

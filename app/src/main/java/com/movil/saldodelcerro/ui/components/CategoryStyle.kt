@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.movil.saldodelcerro.ui.theme.finGo
+import com.movil.saldodelcerro.utils.normalizedKey
 
 data class CategoryStyle(
     val icon: ImageVector,
@@ -20,18 +21,21 @@ data class CategoryStyle(
 /**
  * Estilo visual de una categoria. Los colores salen del tema (paleta FinGO),
  * no de literales locales, y por eso la funcion es @Composable.
+ *
+ * El nombre se compara con [normalizedKey]: sin mayusculas ni acentos, asi "Alimentación" y
+ * "alimentacion" caen en la misma rama sin duplicar literales.
  */
 @Composable
 fun getCategoryStyle(categoryName: String): CategoryStyle {
-    val key = categoryName.lowercase().trim()
+    val key = categoryName.normalizedKey()
     val palette = MaterialTheme.finGo.categoryPalette
 
     val (icon, chip) = when (key) {
-        "alimentaci��n", "alimentacion", "comida" ->
+        "alimentacion", "comida" ->
             Icons.Default.Restaurant to palette[0]
         "transporte" ->
             Icons.Default.DirectionsCar to palette[1]
-        "estudios", "educaci��n", "educacion" ->
+        "estudios", "educacion" ->
             Icons.Default.School to palette[2]
         "entretenimiento", "ocio" ->
             Icons.Default.SportsEsports to palette[3]

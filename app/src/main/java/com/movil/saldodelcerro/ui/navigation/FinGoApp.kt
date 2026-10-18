@@ -12,16 +12,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.movil.saldodelcerro.services.CategoryService
 import com.movil.saldodelcerro.services.LedgerService
 import com.movil.saldodelcerro.ui.appViewModelFactory
 import com.movil.saldodelcerro.ui.screens.expense.ExpenseScreen
 import com.movil.saldodelcerro.ui.screens.home.HomeScreen
 import com.movil.saldodelcerro.ui.screens.income.IncomeScreen
+import com.movil.saldodelcerro.ui.screens.movement.MovementDetailScreen
 import com.movil.saldodelcerro.ui.screens.summary.SummaryScreen
 
 @Composable
@@ -44,9 +47,9 @@ fun FinGoApp(
                     NavigationBarItem(
                         icon = { Icon(tab.icon, contentDescription = tab.label) },
                         label = { Text(tab.label) },
-                        selected = currentRoute == tab.name.lowercase(),
+                        selected = currentRoute == tab.route.route,
                         onClick = {
-                            navController.navigate(tab.name.lowercase()) {
+                            navController.navigate(tab.route.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -61,13 +64,40 @@ fun FinGoApp(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = FinGoRoute.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("home") { HomeScreen(viewModel(factory = viewModelFactory)) }
-            composable("income") { IncomeScreen(viewModel(factory = viewModelFactory)) }
-            composable("expenses") { ExpenseScreen(viewModel(factory = viewModelFactory)) }
-            composable("summary") { SummaryScreen(viewModel(factory = viewModelFactory)) }
+            composable(FinGoRoute.Home.route) {
+                HomeScreen(viewModel(factory = viewModelFactory))
+            }
+            composable(FinGoRoute.Income.route) {
+                IncomeScreen(viewModel(factory = viewModelFactory))
+            }
+            composable(FinGoRoute.Expenses.route) {
+                ExpenseScreen(viewModel(factory = viewModelFactory))
+            }
+            composable(FinGoRoute.Summary.route) {
+                SummaryScreen(
+                    viewModel = viewModel(factory = viewModelFactory),
+                    onMovementClick = { movementId ->
+                        navController.navigate(FinGoRoute.MovementDetail.build(movementId))
+                    }
+                )
+            }
+
+            // [FUNCIONALIDAD: DETALLE CON ARGUMENTO]
+            // Proposito: unico destino que recibe un argumento. Viaja tipado como Long (no como
+            // texto dentro de la ruta) y el ViewModel lo lee de su SavedStateHandle, asi que la
+            // pantalla nunca parsea la ruta a mano.
+            composable(
+                route = FinGoRoute.MovementDetail.route,
+                arguments = listOf(navArgument(MOVEMENT_ID_ARG) { type = NavType.LongType })
+            ) {
+                MovementDetailScreen(
+                    viewModel = viewModel(factory = viewModelFactory),
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

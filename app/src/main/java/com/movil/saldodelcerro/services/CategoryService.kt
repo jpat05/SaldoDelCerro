@@ -1,7 +1,7 @@
 package com.movil.saldodelcerro.services
 
-import com.movil.saldodelcerro.data.models.CategoryEntity
-import com.movil.saldodelcerro.data.repo.CategoryDao
+import com.movil.saldodelcerro.domain.model.Category
+import com.movil.saldodelcerro.domain.repository.CategoryRepository
 import com.movil.saldodelcerro.utils.normalizedKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -14,18 +14,18 @@ import kotlinx.coroutines.flow.map
  * of every user-facing list (`categories` / `expenseCategories` / `incomeCategories` are active-only).
  */
 class CategoryService(
-    private val categoryDao: CategoryDao
+    private val categoryRepository: CategoryRepository
 ) {
     /** Every row, archived included — only the service decides what is user-visible. */
-    val allCategories: Flow<List<CategoryEntity>> = categoryDao.getAllOrderByAsc()
+    val allCategories: Flow<List<Category>> = categoryRepository.observeAll()
 
-    val categories: Flow<List<CategoryEntity>> =
+    val categories: Flow<List<Category>> =
         allCategories.map { list -> list.filter { it.active } }
 
-    val expenseCategories: Flow<List<CategoryEntity>> =
+    val expenseCategories: Flow<List<Category>> =
         categories.map { list -> list.filter { !it.isIncome } }
 
-    val incomeCategories: Flow<List<CategoryEntity>> =
+    val incomeCategories: Flow<List<Category>> =
         categories.map { list -> list.filter { it.isIncome } }
 
     /**
@@ -34,21 +34,21 @@ class CategoryService(
      *
      * @return the id of the created / reused category, or `null` when the name is blank.
      */
-    suspend fun add(category: CategoryEntity): Long? {
-        val name = category.name.trim()
-        if (name.isEmpty()) return null
+    suspend fun add(name: String, isIncome: Boolean): Long? {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return null
 
-        val key = name.normalizedKey()
+        val key = trimmed.normalizedKey()
         val existing = allCategories.first().find { it.name.normalizedKey() == key }
         if (existing != null) {
-            if (!existing.active) categoryDao.setActive(existing.id, true)
+            if (!existing.active) categoryRepository.setActive(existing.id, true)
             return existing.id
         }
 
-        return categoryDao.insert(category.copy(name = name, active = true))
+        return categoryRepository.insert(Category(name = trimmed, isIncome = isIncome))
     }
 
-    suspend fun archive(category: CategoryEntity) = categoryDao.setActive(category.id, false)
+    suspend fun archive(category: Category) = categoryRepository.setActive(category.id, false)
 
-    suspend fun restore(category: CategoryEntity) = categoryDao.setActive(category.id, true)
+    suspend fun restore(category: Category) = categoryRepository.setActive(category.id, true)
 }

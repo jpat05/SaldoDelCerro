@@ -19,31 +19,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.movil.saldodelcerro.data.models.CategoryEntity
-import com.movil.saldodelcerro.data.models.CategoryTotal
-import com.movil.saldodelcerro.data.models.TransactionDto
-import com.movil.saldodelcerro.data.models.TransactionEntity
+import com.movil.saldodelcerro.domain.model.CategoryTotal
+import com.movil.saldodelcerro.domain.model.Movement
+import com.movil.saldodelcerro.ui.UiState
 import com.movil.saldodelcerro.ui.components.CategoryDonutChart
 import com.movil.saldodelcerro.ui.components.SummaryRow
 import com.movil.saldodelcerro.ui.components.TransactionRow
+import com.movil.saldodelcerro.ui.components.UiStateError
+import com.movil.saldodelcerro.ui.components.UiStateLoading
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 import java.math.BigDecimal
 
 @Composable
 fun SummaryScreen(
     viewModel: SummaryViewModel,
+    onMovementClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    SummaryContent(
-        balance = state.balance,
-        totalIncome = state.totalIncome,
-        totalExpense = state.totalExpense,
-        categories = state.categoryTotals,
-        movements = state.movements,
-        modifier = modifier
-    )
+    when (val state = uiState) {
+        is UiState.Loading -> UiStateLoading(modifier)
+
+        is UiState.Error -> UiStateError(message = state.message, modifier = modifier)
+
+        is UiState.Success -> SummaryContent(
+            balance = state.data.balance,
+            totalIncome = state.data.totalIncome,
+            totalExpense = state.data.totalExpense,
+            categories = state.data.categoryTotals,
+            movements = state.data.movements,
+            onMovementClick = onMovementClick,
+            modifier = modifier
+        )
+    }
 }
 
 @Composable
@@ -52,7 +61,8 @@ private fun SummaryContent(
     totalIncome: BigDecimal,
     totalExpense: BigDecimal,
     categories: List<CategoryTotal>,
-    movements: List<TransactionDto>,
+    movements: List<Movement>,
+    onMovementClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -84,7 +94,12 @@ private fun SummaryContent(
         }
 
         item { Text("Movimientos", style = MaterialTheme.typography.titleMedium) }
-        items(movements) { TransactionRow(it) }
+        items(movements) { movement ->
+            TransactionRow(
+                movement = movement,
+                onClick = { onMovementClick(movement.id) }
+            )
+        }
     }
 }
 
@@ -102,11 +117,9 @@ private fun SummaryContentPreview() {
                 CategoryTotal("Salud", BigDecimal("160.00"))
             ),
             movements = listOf(
-                TransactionDto(
-                    transaction = TransactionEntity(reason = "Compra supermercado", amount = BigDecimal("120.50"), typeId = 2L),
-                    type = CategoryEntity(id = 2L, name = "Comida", isIncome = false)
-                )
-            )
+                Movement(reason = "Compra supermercado", amount = BigDecimal("120.50"), categoryId = 2L, categoryName = "Comida", isIncome = false)
+            ),
+            onMovementClick = {}
         )
     }
 }

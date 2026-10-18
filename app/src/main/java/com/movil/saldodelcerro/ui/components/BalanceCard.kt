@@ -19,10 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.movil.saldodelcerro.ui.theme.FinGoBlue
 import com.movil.saldodelcerro.ui.theme.SaldoDelCerroTheme
 import com.movil.saldodelcerro.utils.formatMoney
 import java.math.BigDecimal
@@ -32,10 +30,15 @@ fun BalanceCard(
     balance: BigDecimal,
     modifier: Modifier = Modifier
 ) {
+    // Roles del tema en vez de constantes de la paleta: `primary`/`onPrimary` son el par
+    // claro/oscuro (FinGoBlue / FinGoBlueDark), asi la tarjeta acompana al tema en ambos modos.
+    val containerColor = MaterialTheme.colorScheme.primary
+    val onContainerColor = MaterialTheme.colorScheme.onPrimary
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = FinGoBlue),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -48,23 +51,23 @@ fun BalanceCard(
             Icon(
                 imageVector = Icons.Filled.AccountBalanceWallet,
                 contentDescription = "Billetera",
-                tint = Color.White,
+                tint = onContainerColor,
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f))
+                    .background(onContainerColor.copy(alpha = 0.2f))
                     .padding(10.dp)
             )
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = "Saldo disponible",
                     style = MaterialTheme.typography.labelLarge,
-                    color = Color.White.copy(alpha = 0.85f)
+                    color = onContainerColor.copy(alpha = 0.85f)
                 )
                 Text(
                     text = balance.formatMoney(),
                     style = MaterialTheme.typography.headlineMedium,
-                    color = Color.White
+                    color = onContainerColor
                 )
             }
         }
